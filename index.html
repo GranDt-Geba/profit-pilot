@@ -710,6 +710,9 @@ body {
       <div class="field"><label>Email</label><input type="email" id="loginEmail" placeholder="tu@email.com"></div>
       <div class="field"><label>Contraseña</label><input type="password" id="loginPass" placeholder="••••••••"></div>
       <button class="btn-auth" onclick="handleLogin()">Entrar</button>
+      <div style="text-align:center;margin-top:12px">
+        <span onclick="handleResetPassword()" style="font-size:12px;color:rgba(255,255,255,0.4);cursor:pointer;text-decoration:underline">Olvidé mi contraseña</span>
+      </div>
     </div>
     <div id="registerForm" class="hidden">
       <div class="field"><label>Email</label><input type="email" id="regEmail" placeholder="tu@email.com"></div>
@@ -947,7 +950,7 @@ body {
 <!-- FIREBASE -->
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 import { getFirestore, doc, setDoc, getDoc, collection, getDocs, orderBy, query } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 const firebaseConfig = {
@@ -1027,6 +1030,18 @@ window.handleRegister = async () => {
   } catch(e) {
     showAuthError(e.code === 'auth/email-already-in-use' ? 'Este email ya está registrado' : 'Error al crear la cuenta');
     btn.disabled = false; btn.textContent = 'Crear cuenta gratis';
+  }
+};
+
+window.handleResetPassword = async () => {
+  const email = document.getElementById('loginEmail').value.trim();
+  if (!email) { showAuthError('Ingresá tu email primero'); return; }
+  try {
+    await sendPasswordResetEmail(auth, email);
+    showAuthError('✓ Te enviamos un email para restablecer tu contraseña');
+    document.getElementById('authError').style.color = 'var(--teal-mid)';
+  } catch(e) {
+    showAuthError('No encontramos una cuenta con ese email');
   }
 };
 
