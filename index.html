@@ -1383,7 +1383,7 @@ INSTRUCCIONES:
   const apiMessages = PP.chatHistory.map(m => ({ role: m.role === 'user' ? 'user' : 'assistant', content: m.content }));
 
   try {
-    const response = await fetch('https://corsproxy.io/?https://api.anthropic.com/v1/messages', {
+    const response = await fetch('https://corsproxy.io/?url=' + encodeURIComponent('https://api.anthropic.com/v1/messages'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -1398,10 +1398,15 @@ INSTRUCCIONES:
       })
     });
     const res = await response.json();
-    const reply = res.content?.[0]?.text || 'Error al obtener respuesta.';
-    PP.chatHistory.push({ role: 'ai', content: reply });
+    if (!response.ok) {
+      const errMsg = res.error?.message || `Error ${response.status}`;
+      PP.chatHistory.push({ role: 'ai', content: `Error de la API: ${errMsg}` });
+    } else {
+      const reply = res.content?.[0]?.text || 'Error al obtener respuesta.';
+      PP.chatHistory.push({ role: 'ai', content: reply });
+    }
   } catch(e) {
-    PP.chatHistory.push({ role: 'ai', content: 'Error de conexión. Revisá tu internet e intentá de nuevo.' });
+    PP.chatHistory.push({ role: 'ai', content: `Error de conexión: ${e.message}` });
   }
 
   document.getElementById('chatSendBtn').disabled = false;
