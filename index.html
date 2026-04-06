@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Profit Pilot — Tu consejero financiero</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Bricolage+Grotesque:wght@400;500;600;700;800;900&family=Lora:ital,wght@1,400;1,600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -600,6 +601,89 @@ body {
 }
 .toast.show { opacity: 1; }
 
+/* ============ EXCEL IMPORT ============ */
+.excel-import-zone {
+  border: 2px dashed var(--border);
+  border-radius: 16px; padding: 20px 16px;
+  text-align: center; cursor: pointer;
+  transition: all .2s; margin-bottom: 16px;
+  background: var(--surface);
+}
+.excel-import-zone:hover, .excel-import-zone.drag-over {
+  border-color: var(--teal-mid);
+  background: var(--teal-light);
+}
+.excel-import-icon { font-size: 28px; margin-bottom: 6px; }
+.excel-import-title { font-weight: 700; font-size: 14px; color: var(--ink2); }
+.excel-import-sub { font-size: 11px; color: var(--ink4); margin-top: 2px; }
+.excel-import-btn {
+  display: inline-block; margin-top: 10px;
+  padding: 8px 18px; background: var(--ink);
+  color: #fff; border-radius: 10px;
+  font-size: 12px; font-weight: 700;
+}
+
+.excel-analyzing {
+  display: none; background: var(--teal-light);
+  border: 1px solid rgba(29,122,110,0.2);
+  border-radius: 14px; padding: 16px;
+  text-align: center; margin-bottom: 16px;
+}
+.excel-analyzing.show { display: block; }
+.excel-analyzing-title { font-weight: 700; font-size: 13px; color: var(--teal); }
+.excel-analyzing-sub { font-size: 11px; color: var(--ink4); margin-top: 4px; }
+.excel-pulse { display: inline-block; animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:1} }
+
+.excel-results {
+  display: none; border-radius: 14px;
+  overflow: hidden; margin-bottom: 16px;
+  border: 1px solid var(--border);
+}
+.excel-results.show { display: block; }
+.excel-results-header {
+  background: var(--ink); color: #fff;
+  padding: 12px 16px; font-weight: 700; font-size: 13px;
+}
+.excel-results-summary {
+  background: var(--surface); padding: 12px 16px;
+  font-size: 12px; color: var(--ink3);
+  border-bottom: 1px solid var(--border);
+}
+
+.excel-flags { padding: 12px 16px; background: var(--surface); display: flex; flex-direction: column; gap: 8px; }
+.excel-flag {
+  border-radius: 10px; padding: 10px 12px;
+  font-size: 12px; line-height: 1.5;
+}
+.excel-flag.personal { background: var(--amber-light); border: 1px solid rgba(200,114,10,0.2); }
+.excel-flag.duplicado { background: var(--red-light); border: 1px solid rgba(192,57,43,0.2); }
+.excel-flag.info { background: var(--teal-light); border: 1px solid rgba(29,122,110,0.15); }
+.excel-flag-title { font-weight: 700; color: var(--ink); margin-bottom: 2px; }
+.excel-flag.personal .excel-flag-title { color: var(--amber); }
+.excel-flag.duplicado .excel-flag-title { color: var(--red); }
+.excel-flag.info .excel-flag-title { color: var(--teal); }
+
+.excel-actions {
+  padding: 12px 16px; background: var(--surface2);
+  border-top: 1px solid var(--border);
+  display: flex; gap: 8px;
+}
+.btn-apply-excel {
+  flex: 1; padding: 12px;
+  background: var(--teal); color: #fff;
+  border: none; border-radius: 10px;
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 13px; font-weight: 700; cursor: pointer;
+}
+.btn-discard-excel {
+  padding: 12px 16px;
+  background: var(--surface); color: var(--ink3);
+  border: 1px solid var(--border); border-radius: 10px;
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 13px; cursor: pointer;
+}
+
 /* UTILS */
 .hidden { display: none !important; }
 </style>
@@ -726,6 +810,35 @@ body {
   <!-- CARGAR PAGE -->
   <div class="page" id="pageCargar">
     <div class="section-title">Cargá los números del mes</div>
+
+    <!-- EXCEL IMPORT -->
+    <input type="file" id="excelFileInput" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleExcelUpload(event)">
+    <div class="excel-import-zone" id="excelZone"
+      onclick="document.getElementById('excelFileInput').click()"
+      ondragover="event.preventDefault();this.classList.add('drag-over')"
+      ondragleave="this.classList.remove('drag-over')"
+      ondrop="event.preventDefault();this.classList.remove('drag-over');handleExcelDrop(event)">
+      <div class="excel-import-icon">📊</div>
+      <div class="excel-import-title">Importar desde Excel</div>
+      <div class="excel-import-sub">La IA analiza tu planilla y completa el formulario automáticamente</div>
+      <div class="excel-import-btn">Seleccionar archivo</div>
+    </div>
+
+    <div class="excel-analyzing" id="excelAnalyzing">
+      <div class="excel-pulse">⏳</div>
+      <div class="excel-analyzing-title">Analizando tu Excel con IA...</div>
+      <div class="excel-analyzing-sub">Esto puede tardar unos segundos</div>
+    </div>
+
+    <div class="excel-results" id="excelResults">
+      <div class="excel-results-header" id="excelResultsHeader">Análisis completado</div>
+      <div class="excel-results-summary" id="excelResultsSummary"></div>
+      <div class="excel-flags" id="excelFlags"></div>
+      <div class="excel-actions">
+        <button class="btn-apply-excel" onclick="applyExcelData()">✓ Autocompletar formulario</button>
+        <button class="btn-discard-excel" onclick="discardExcel()">Descartar</button>
+      </div>
+    </div>
 
     <div class="form-section">
       <div class="form-section-title">📅 Período</div>
@@ -1146,6 +1259,168 @@ function buildAlerts(data, margen, gastosPct, insumosPct, ticket, moneda) {
       <div class="alert-badge ${a.badge}">${a.badge === 'urgent' ? 'URGENTE' : a.badge === 'opp' ? 'POSITIVO' : 'CONSEJO'}</div>
     </div>`).join('');
 }
+
+// EXCEL IMPORT
+let excelAnalyzedData = null;
+
+window.handleExcelDrop = (event) => {
+  const file = event.dataTransfer.files[0];
+  if (file) processExcelFile(file);
+};
+
+window.handleExcelUpload = (event) => {
+  const file = event.target.files[0];
+  if (file) processExcelFile(file);
+  event.target.value = '';
+};
+
+function processExcelFile(file) {
+  const validTypes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/vnd.ms-excel', 'text/csv', ''];
+  document.getElementById('excelZone').style.display = 'none';
+  document.getElementById('excelResults').classList.remove('show');
+  document.getElementById('excelAnalyzing').classList.add('show');
+
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: 'array' });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+
+      // Limit rows to avoid huge prompts
+      const trimmed = rows.filter(r => r.some(c => c !== '')).slice(0, 100);
+      const csvText = trimmed.map(r => r.join('\t')).join('\n');
+
+      await analyzeExcelWithAI(csvText, file.name);
+    } catch(err) {
+      document.getElementById('excelAnalyzing').classList.remove('show');
+      document.getElementById('excelZone').style.display = '';
+      showToast('Error al leer el archivo. Verificá que sea un Excel válido.');
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+async function analyzeExcelWithAI(csvText, fileName) {
+  const moneda = PP.bizProfile?.moneda?.split(' ')[1] || '$';
+  const rubro = PP.bizProfile?.rubro || 'negocio';
+
+  const systemPrompt = `Sos un analista financiero experto en pymes argentinas. Tu tarea es analizar datos de un Excel de un negocio de rubro "${rubro}" y extraer información financiera estructurada.
+
+REGLAS IMPORTANTES:
+- Separar claramente ingresos de gastos
+- Identificar si un gasto es personal/del hogar (Netflix, Spotify, supermercado personal, farmacia personal, gimnasio personal, etc.) y marcarlo como alerta
+- Identificar gastos duplicados y marcarlos como alerta
+- Los gastos fijos son los que se repiten mes a mes (alquiler, sueldos, servicios)
+- Los gastos variables son los que cambian (materiales, insumos, publicidad)
+- Si no podés determinar si algo es fijo o variable, ponerlo como variable
+- Ignorar filas vacías, totales, subtotales (no duplicar)
+- Los números pueden venir con puntos o comas como separadores decimales
+
+Respondé ÚNICAMENTE con un JSON válido con esta estructura exacta:
+{
+  "ventas": <número o 0>,
+  "clientes": <número o 0>,
+  "otrosIngresos": <número o 0>,
+  "gastosFixed": [{"nombre": "...", "monto": <número>}],
+  "gastosVar": [{"nombre": "...", "monto": <número>}],
+  "alertas": [{"tipo": "personal"|"duplicado"|"info", "item": "...", "monto": <número o 0>, "mensaje": "..."}],
+  "resumen": "..."
+}`;
+
+  const userMsg = `Archivo: ${fileName}
+
+Datos del Excel (separados por tabs):
+${csvText}
+
+Analizá y respondé solo con el JSON.`;
+
+  try {
+    const response = await fetch(WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1500,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userMsg }]
+      })
+    });
+
+    const res = await response.json();
+    const text = res.content?.[0]?.text || '';
+
+    // Extract JSON from response
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('No JSON in response');
+
+    excelAnalyzedData = JSON.parse(jsonMatch[0]);
+    showExcelResults(excelAnalyzedData);
+  } catch(err) {
+    document.getElementById('excelAnalyzing').classList.remove('show');
+    document.getElementById('excelZone').style.display = '';
+    showToast('Error al analizar el Excel. Intentá de nuevo.');
+  }
+}
+
+function showExcelResults(data) {
+  document.getElementById('excelAnalyzing').classList.remove('show');
+
+  const totalGastos = [...(data.gastosFixed||[]), ...(data.gastosVar||[])]
+    .reduce((a, g) => a + Number(g.monto||0), 0);
+  const ganancia = Number(data.ventas||0) - totalGastos;
+  const moneda = PP.bizProfile?.moneda?.split(' ')[1] || '$';
+
+  document.getElementById('excelResultsHeader').textContent =
+    `Análisis completado · ${(data.gastosFixed||[]).length + (data.gastosVar||[]).length} gastos encontrados`;
+
+  document.getElementById('excelResultsSummary').innerHTML =
+    data.resumen + `<br><strong>Ventas: ${moneda}${formatNum(data.ventas)}</strong> · ` +
+    `Gastos: ${moneda}${formatNum(totalGastos)} · ` +
+    `Ganancia estimada: ${moneda}${formatNum(ganancia)}`;
+
+  const flagsEl = document.getElementById('excelFlags');
+  if ((data.alertas||[]).length === 0) {
+    flagsEl.innerHTML = '<div class="excel-flag info"><div class="excel-flag-title">Todo limpio</div>No detecté gastos personales ni anomalías.</div>';
+  } else {
+    flagsEl.innerHTML = data.alertas.map(a => `
+      <div class="excel-flag ${a.tipo}">
+        <div class="excel-flag-title">${a.tipo === 'personal' ? '⚠️ Posible gasto personal' : a.tipo === 'duplicado' ? '🔴 Duplicado' : 'ℹ️ Info'}: ${a.item}${a.monto ? ` · ${moneda}${formatNum(a.monto)}` : ''}</div>
+        ${a.mensaje}
+      </div>`).join('');
+  }
+
+  document.getElementById('excelResults').classList.add('show');
+}
+
+window.applyExcelData = () => {
+  if (!excelAnalyzedData) return;
+  const d = excelAnalyzedData;
+
+  // Fill income fields
+  if (d.ventas) document.getElementById('ventas').value = d.ventas;
+  if (d.clientes) document.getElementById('clientes').value = d.clientes;
+  if (d.otrosIngresos) document.getElementById('otrosIngresos').value = d.otrosIngresos;
+
+  // Clear and fill expense lists
+  document.getElementById('gastosFixedList').innerHTML = '';
+  document.getElementById('gastosVarList').innerHTML = '';
+  (d.gastosFixed||[]).forEach(g => addLineItem('fixed', g.nombre, g.monto));
+  (d.gastosVar||[]).forEach(g => addLineItem('var', g.nombre, g.monto));
+
+  document.getElementById('excelResults').classList.remove('show');
+  document.getElementById('excelZone').style.display = '';
+  excelAnalyzedData = null;
+  showToast('✓ Formulario completado con los datos del Excel');
+};
+
+window.discardExcel = () => {
+  document.getElementById('excelResults').classList.remove('show');
+  document.getElementById('excelZone').style.display = '';
+  excelAnalyzedData = null;
+};
 
 // LINE ITEMS
 window.addLineItem = (type, nombre = '', monto = '') => {
