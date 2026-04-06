@@ -579,6 +579,16 @@ body {
 .history-month-card:hover { border-color: var(--teal); }
 .hmc-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 .hmc-month { font-size: 13px; font-weight: 800; color: var(--ink); }
+.hmc-actions { display: flex; gap: 6px; align-items: center; }
+.hmc-btn {
+  padding: 4px 10px; border-radius: 8px; border: 1px solid var(--border);
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 11px; font-weight: 700; cursor: pointer;
+  background: var(--surface2); color: var(--ink3);
+  transition: all .2s;
+}
+.hmc-btn:hover { background: var(--teal-light); border-color: var(--teal); color: var(--teal); }
+.hmc-btn.del:hover { background: var(--red-light); border-color: var(--red); color: var(--red); }
 .hmc-score {
   font-size: 11px; font-weight: 700;
   padding: 3px 10px; border-radius: 10px;
@@ -951,7 +961,7 @@ body {
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-import { getFirestore, doc, setDoc, getDoc, collection, getDocs, orderBy, query } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { getFirestore, doc, setDoc, getDoc, deleteDoc, collection, getDocs, orderBy, query } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 const firebaseConfig = {
   apiKey: "AIzaSyD2yEoLuKbAmVoWoPZcT1lm5EGQ4bPwRf8",
@@ -1500,6 +1510,48 @@ window.saveMonthData = async () => {
 };
 
 // RENDER HISTORIAL
+window.editMonth = (key) => {
+  const d = PP.monthsData[key];
+  if (!d) return;
+
+  // Set period selectors
+  document.getElementById('formMes').value = d.mes;
+  document.getElementById('formAnio').value = d.anio;
+
+  // Set income fields
+  document.getElementById('ventas').value = d.ventas || '';
+  document.getElementById('clientes').value = d.clientes || '';
+  document.getElementById('otrosIngresos').value = d.otrosIngresos || '';
+
+  // Rebuild expense lists
+  document.getElementById('gastosFixedList').innerHTML = '';
+  document.getElementById('gastosVarList').innerHTML = '';
+  (d.gastosFixed||[]).forEach(g => addLineItem('fixed', g.nombre, g.monto));
+  (d.gastosVar||[]).forEach(g => addLineItem('var', g.nombre, g.monto));
+
+  switchPage('cargar');
+  showToast(`Editando ${key} — guardá cuando termines`);
+};
+
+window.deleteMonth = async (key) => {
+  if (!confirm(`¿Eliminar los datos de ${key}? Esta acción no se puede deshacer.`)) return;
+  try {
+    await deleteDoc(doc(db, 'users', PP.user.uid, 'months', key));
+    delete PP.monthsData[key];
+    if (PP.currentMonth === key) {
+      const remaining = Object.keys(PP.monthsData).sort().reverse();
+      PP.currentMonth = remaining[0] || null;
+      document.getElementById('navMonth').textContent = PP.currentMonth || '';
+    }
+    renderHistorial();
+    renderMonthSelector();
+    renderHome();
+    showToast(`✓ ${key} eliminado`);
+  } catch(e) {
+    showToast('Error al eliminar. Intentá de nuevo.');
+  }
+};
+
 function renderHistorial() {
   const content = document.getElementById('historialContent');
   const months = Object.keys(PP.monthsData).sort().reverse();
@@ -1519,8 +1571,12 @@ function renderHistorial() {
       <div class="history-month-card" onclick="PP.currentMonth='${key}';document.getElementById('navMonth').textContent='${key}';renderMonthSelector();renderHome();switchPage('home')">
         <div class="hmc-top">
           <div class="hmc-month">${key}</div>
-          <div class="hmc-score ${score >= 70 ? 'good' : 'ok'}">${score >= 70 ? '✓ Buena salud' : '~ Regular'}</div>
+          <div class="hmc-actions">
+            <button class="hmc-btn" onclick="event.stopPropagation();editMonth('${key}')">✏️ Editar</button>
+            <button class="hmc-btn del" onclick="event.stopPropagation();deleteMonth('${key}')">🗑️ Eliminar</button>
+          </div>
         </div>
+        <div class="hmc-score ${score >= 70 ? 'good' : 'ok'}" style="margin-bottom:10px">${score >= 70 ? '✓ Buena salud' : '~ Regular'}</div>
         <div class="hmc-metrics">
           <div class="hmc-metric"><div class="hmc-metric-val">${moneda}${formatNum(ganancia.toFixed(0))}</div><div class="hmc-metric-lbl">Ganancia</div></div>
           <div class="hmc-metric"><div class="hmc-metric-val">${margen}%</div><div class="hmc-metric-lbl">Margen</div></div>
