@@ -846,7 +846,7 @@ const firebaseConfig = {
   appId: "1:554874734184:web:f7c2767fa554b3deb35ddd"
 };
 
-const CLAUDE_KEY = "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";
+const getClaudeKey = () => localStorage.getItem('pp_claude_key') || '';
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -1320,6 +1320,13 @@ window.sendMessage = async () => {
   const data = PP.monthsData[PP.currentMonth];
   if (!data) return;
 
+  const claudeKey = getClaudeKey();
+  if (!claudeKey) {
+    const key = prompt('Ingresá tu API key de Anthropic para usar el Consejero IA:\n(Se guarda solo en tu dispositivo, nunca se sube a ningún servidor)');
+    if (!key || !key.trim()) return;
+    localStorage.setItem('pp_claude_key', key.trim());
+  }
+
   inp.value = '';
   document.getElementById('chatSendBtn').disabled = true;
 
@@ -1387,7 +1394,7 @@ INSTRUCCIONES:
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': CLAUDE_KEY,
+        'x-api-key': getClaudeKey(),
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
