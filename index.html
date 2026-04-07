@@ -364,7 +364,7 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;font-size:14px;ba
 .sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99;backdrop-filter:blur(2px)}
 .sb-overlay.show{display:block}
 @media(max-width:768px){
-  .sidebar{transform:translateX(-200px);transition:transform .3s cubic-bezier(.4,0,.2,1);z-index:200}
+  .sidebar{width:82vw;max-width:280px;transform:translateX(-82vw);transition:transform .3s cubic-bezier(.4,0,.2,1);z-index:200}
   .sidebar.mobile-open{transform:translateX(0)}
 }
 .hidden{display:none!important}
@@ -504,13 +504,10 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;font-size:14px;ba
       + Subir Excel
     </button>
     <div class="sb-bottom">
-      <button class="sb-item" onclick="switchPage('cargar')" style="margin-bottom:4px">
+      <button class="sb-item" onclick="switchPage('cargar')">
         <span class="sb-icon">🔗</span> Vincular MercadoLibre
       </button>
-      <button class="sb-item" onclick="switchPage('cargar')">
-        <span class="sb-icon">⚙️</span> Configuración
-      </button>
-      <div class="sb-user" style="margin-top:8px;padding-top:8px;border-top:1px solid #1e293b">
+      <div class="sb-user" style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.06)">
         <div class="sb-avatar" id="navAvatar">?</div>
         <div class="sb-user-info">
           <div class="sb-user-name" id="sbUserName">Usuario</div>
@@ -918,8 +915,10 @@ function renderChart() {
       return mIdx >= 0 ? new Date(parseInt(y), mIdx, 1) : null;
     }).filter(Boolean).sort((a,b) => a-b);
     startDate = parsed[0];
+    // Always show at least 1 month before first data so area renders
+    startDate = new Date(startDate.getFullYear(), startDate.getMonth() - 1, 1);
   } else {
-    startDate = new Date(now.getFullYear(), now.getMonth(), 1); // only current month
+    startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1); // 2 months back
   }
 
   // Build range from startDate to now (max 12 months)
@@ -1067,6 +1066,12 @@ function renderHome() {
   const donutData = [...top3.map(g=>Number(g.monto)), ...(othersTotal>0?[othersTotal]:[])];
   const donutColors = ['#10b981','#3b82f6','#f59e0b','#94a3b8'];
 
+  // Responsive grids based on screen width
+  const mob = window.innerWidth < 700;
+  const kpiCols = mob ? '1fr 1fr' : '1fr 1fr 1fr';
+  const chartCols = mob ? '1fr' : '1fr 260px';
+  const bottomCols = mob ? '1fr' : '1fr 1fr';
+
   content.innerHTML = `
     <!-- HEALTH BANNER -->
     <div style="background:linear-gradient(135deg,rgba(16,185,129,.1),rgba(16,185,129,.04));border:1px solid rgba(16,185,129,.22);border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:14px;margin-bottom:18px;box-shadow:0 2px 10px rgba(16,185,129,.07)">
@@ -1079,8 +1084,8 @@ function renderHome() {
     </div>
 
     <!-- KPI CARDS -->
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:18px">
-      <div style="background:linear-gradient(135deg,#059669 0%,#10b981 55%,#34d399 100%);border-radius:12px;padding:18px 20px;box-shadow:0 8px 24px rgba(16,185,129,.3);position:relative;overflow:hidden">
+    <div style="display:grid;grid-template-columns:${kpiCols};gap:14px;margin-bottom:18px">
+      <div style="background:linear-gradient(135deg,#059669 0%,#10b981 55%,#34d399 100%);border-radius:12px;padding:18px 20px;box-shadow:0 8px 24px rgba(16,185,129,.3);position:relative;overflow:hidden;${mob?'grid-column:1/-1':''}"  >
         <div style="position:absolute;right:-18px;bottom:-18px;width:75px;height:75px;background:rgba(255,255,255,.08);border-radius:50%"></div>
         <div style="position:absolute;right:38px;top:-12px;width:48px;height:48px;background:rgba(255,255,255,.06);border-radius:50%"></div>
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;position:relative">
@@ -1109,7 +1114,7 @@ function renderHome() {
     </div>
 
     <!-- CHART + ALERTS ROW -->
-    <div style="display:grid;grid-template-columns:1fr 260px;gap:14px;margin-bottom:14px">
+    <div style="display:grid;grid-template-columns:${chartCols};gap:14px;margin-bottom:14px">
       <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.07);overflow:hidden">
         <div style="padding:16px 18px 4px;display:flex;justify-content:space-between;align-items:center">
           <span style="font-size:14px;font-weight:700;color:#0f172a">Ganancia Neta Mensual</span>
@@ -1126,7 +1131,7 @@ function renderHome() {
     </div>
 
     <!-- COSTOS + DETALLE ROW -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:4px">
+    <div style="display:grid;grid-template-columns:${bottomCols};gap:14px;margin-bottom:4px">
       <!-- Costos card -->
       <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.07);overflow:hidden">
         <div style="padding:16px 18px 0;display:flex;justify-content:space-between;align-items:center">
