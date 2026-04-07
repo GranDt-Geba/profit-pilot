@@ -353,9 +353,19 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;font-size:14px;ba
   .dash-grid{grid-template-columns:1fr}
   .topbar{padding:0 16px}
   .topbar-search{display:none}
+  .sb-hamburger{display:flex!important}
 }
 @media(max-width:480px){
-  .kpi-grid{grid-template-columns:1fr}
+  .kpi-grid{grid-template-columns:1fr 1fr}
+}
+
+/* MOBILE SIDEBAR DRAWER */
+.sb-hamburger{display:none;align-items:center;justify-content:center;width:36px;height:36px;border:none;background:none;font-size:20px;cursor:pointer;color:var(--ink);padding:0;flex-shrink:0}
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99;backdrop-filter:blur(2px)}
+.sb-overlay.show{display:block}
+@media(max-width:768px){
+  .sidebar{transform:translateX(-200px);transition:transform .3s cubic-bezier(.4,0,.2,1);z-index:200}
+  .sidebar.mobile-open{transform:translateX(0)}
 }
 .hidden{display:none!important}
 </style>
@@ -465,7 +475,7 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;font-size:14px;ba
 <div class="app-layout">
 
   <!-- SIDEBAR -->
-  <aside class="sidebar">
+  <aside class="sidebar" id="mainSidebar">
     <div class="sb-logo">
       <div class="sb-logo-text">🚀 Profit<span>Pilot</span></div>
       <div class="sb-logo-sub" id="homeBizName">Tu negocio</div>
@@ -515,6 +525,7 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;font-size:14px;ba
   <div class="main-content">
     <header class="topbar">
       <div class="topbar-left">
+        <button class="sb-hamburger" id="sbHamburger" onclick="toggleSidebar()">☰</button>
         <span class="topbar-biz" id="topbarBiz">Mi Negocio</span>
         <span class="topbar-month" id="navMonth"></span>
       </div>
@@ -658,6 +669,9 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;font-size:14px;ba
     </button>
   </div>
 </div>
+<!-- SIDEBAR OVERLAY (mobile) -->
+<div class="sb-overlay" id="sbOverlay" onclick="toggleSidebar()"></div>
+
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
@@ -890,14 +904,32 @@ function renderMonthSelector() {
 let profitChart = null;
 
 function renderChart() {
-  const months = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const monthNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
   const labels = [], gananciaData = [], gastosData = [];
   const now = new Date();
-  for (let i = 5; i >= 0; i--) {
-    const dt = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const key = `${months[dt.getMonth()]} ${dt.getFullYear()}`;
+
+  // Find the first month that has data
+  const dataKeys = Object.keys(PP.monthsData);
+  let startDate;
+  if (dataKeys.length > 0) {
+    const parsed = dataKeys.map(k => {
+      const [m, y] = k.split(' ');
+      const mIdx = monthNames.indexOf(m);
+      return mIdx >= 0 ? new Date(parseInt(y), mIdx, 1) : null;
+    }).filter(Boolean).sort((a,b) => a-b);
+    startDate = parsed[0];
+  } else {
+    startDate = new Date(now.getFullYear(), now.getMonth(), 1); // only current month
+  }
+
+  // Build range from startDate to now (max 12 months)
+  let cur = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+  const end = new Date(now.getFullYear(), now.getMonth(), 1);
+  let count = 0;
+  while (cur <= end && count < 12) {
+    const key = `${monthNames[cur.getMonth()]} ${cur.getFullYear()}`;
     const md = PP.monthsData[key];
-    labels.push(months[dt.getMonth()].slice(0,3));
+    labels.push(monthNames[cur.getMonth()].slice(0,3));
     if (md) {
       const ing = Number(md.ventas||0) + Number(md.otrosIngresos||0);
       const gast = (md.gastosFixed||[]).reduce((a,g)=>a+Number(g.monto||0),0) +
@@ -905,6 +937,8 @@ function renderChart() {
       gananciaData.push(ing - gast);
       gastosData.push(gast);
     } else { gananciaData.push(0); gastosData.push(0); }
+    cur = new Date(cur.getFullYear(), cur.getMonth() + 1, 1);
+    count++;
   }
   const canvas = document.getElementById('trendChart');
   if (!canvas) return;
@@ -1669,7 +1703,15 @@ window.switchPage = (page) => {
   if (page === 'chat') renderChat();
   if (page === 'home') renderHome();
   if (page === 'historial') renderHistorial();
+  // Close mobile sidebar if open
+  document.getElementById('mainSidebar')?.classList.remove('mobile-open');
+  document.getElementById('sbOverlay')?.classList.remove('show');
   window.scrollTo(0, 0);
+};
+
+window.toggleSidebar = () => {
+  document.getElementById('mainSidebar').classList.toggle('mobile-open');
+  document.getElementById('sbOverlay').classList.toggle('show');
 };
 
 window.renderHome = renderHome;
