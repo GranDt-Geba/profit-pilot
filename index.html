@@ -1068,96 +1068,123 @@ function renderHome() {
   const donutColors = ['#10b981','#3b82f6','#f59e0b','#94a3b8'];
 
   content.innerHTML = `
-    <div class="health-banner ${healthClass}" style="margin-bottom:16px">
-      <div class="hb-icon">${healthIcon}</div>
-      <div class="hb-info">
-        <div class="hb-title" style="font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:.5px">${healthText}</div>
-        <div class="hb-sub">Tu margen está ${margen >= 20 ? 'por encima del promedio' : 'por debajo del promedio'} y ${ganancia>0?'estás generando ganancias consistentes':'necesitás mejorar la rentabilidad'}.</div>
+    <!-- HEALTH BANNER -->
+    <div style="background:linear-gradient(135deg,rgba(16,185,129,.1),rgba(16,185,129,.04));border:1px solid rgba(16,185,129,.22);border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:14px;margin-bottom:18px;box-shadow:0 2px 10px rgba(16,185,129,.07)">
+      <div style="width:28px;height:28px;background:#10b981;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700;flex-shrink:0">✓</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:800;color:#0f172a;text-transform:uppercase;letter-spacing:.6px">${score>=70?'NEGOCIO SALUDABLE':score>=50?'ATENCIÓN REQUERIDA':'SITUACIÓN CRÍTICA'}</div>
+        <div style="font-size:12px;color:#64748b;margin-top:2px">Tu margen está ${margen>=20?'por encima del promedio':'por debajo del promedio'} y estás ${ganancia>0?'generando ganancias consistentes':'perdiendo dinero este mes'}.</div>
       </div>
-      <button onclick="switchPage('chat')" style="padding:8px 18px;background:var(--green);color:#fff;border:none;border-radius:9px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0">Continuar →</button>
+      <button onclick="switchPage('chat')" style="padding:8px 16px;background:#10b981;color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;display:flex;align-items:center;gap:5px">Continuar <span>▼</span></button>
     </div>
 
-    <div class="kpi-grid">
-      <div class="kpi-card kpi-featured green">
-        <div class="kpi-lbl">Ganancia mensual</div>
-        <div class="kpi-val" style="font-size:28px">${moneda}${formatNum(ganancia.toFixed(0))}</div>
-        <div class="kpi-delta ${ganancia>0?'up':'down'}" style="margin-top:6px">${ganancia>0?'↑ Ganancia real':'↓ Pérdida'}</div>
-      </div>
-      <div class="kpi-card ${margen>=15?'green':margen>=10?'amber':'red'}">
-        <div class="kpi-lbl">Margen</div>
-        <div class="kpi-val" style="font-size:28px">${margen}%</div>
-        <div class="kpi-delta neu" style="margin-top:6px">Rentabilidad</div>
-      </div>
-      <div class="kpi-card red">
-        <div class="kpi-lbl">Costos</div>
-        <div class="kpi-val" style="font-size:28px">${moneda}${formatNum(totalGastos.toFixed(0))}</div>
-        <div class="kpi-delta neu" style="margin-top:6px">Total de costos</div>
-      </div>
-    </div>
-
-    <div class="dash-grid">
-      <div class="dash-col">
-        <div class="card">
-          <div class="card-header">
-            <span class="card-title" style="font-size:14px;font-weight:700">Ganancia Neta Mensual</span>
-            <span class="card-sub" style="font-size:11px">${moneda}${formatNum(ganancia.toFixed(0))}</span>
-          </div>
-          <div class="chart-wrap" style="height:240px"><canvas id="trendChart"></canvas></div>
+    <!-- KPI CARDS -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:18px">
+      <div style="background:linear-gradient(135deg,#059669 0%,#10b981 55%,#34d399 100%);border-radius:12px;padding:18px 20px;box-shadow:0 8px 24px rgba(16,185,129,.3);position:relative;overflow:hidden">
+        <div style="position:absolute;right:-18px;bottom:-18px;width:75px;height:75px;background:rgba(255,255,255,.08);border-radius:50%"></div>
+        <div style="position:absolute;right:38px;top:-12px;width:48px;height:48px;background:rgba(255,255,255,.06);border-radius:50%"></div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;position:relative">
+          <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.8);text-transform:uppercase;letter-spacing:.8px">Ganancia mensual</div>
+          <span style="font-size:14px;opacity:.55">📊</span>
         </div>
+        <div style="font-size:28px;font-weight:800;color:#fff;margin-bottom:6px;line-height:1;position:relative">${moneda}${formatNum(ganancia.toFixed(0))}</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.7);position:relative">Ganancia real</div>
       </div>
-      <div class="dash-col">
-        <div class="card" style="overflow:hidden">
-          <div class="card-header-dark">Alertas y Oportunidades</div>
-          <div class="card-body" style="padding:12px">${buildAlerts(data,margen,gastosPct,insumosPct,ticket,moneda)}</div>
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px 20px;box-shadow:0 1px 4px rgba(0,0,0,.07)">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+          <div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.8px">Margen</div>
+          <span style="font-size:14px;opacity:.35">📊</span>
         </div>
+        <div style="font-size:28px;font-weight:800;color:#0f172a;margin-bottom:6px;line-height:1">${margen}%</div>
+        <div style="font-size:11px;color:#94a3b8">Rentabilidad</div>
+      </div>
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px 20px;box-shadow:0 1px 4px rgba(0,0,0,.07)">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+          <div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.8px">Costos</div>
+          <span style="font-size:14px;opacity:.35">📊</span>
+        </div>
+        <div style="font-size:28px;font-weight:800;color:#0f172a;margin-bottom:6px;line-height:1">${moneda}${formatNum(totalGastos.toFixed(0))}</div>
+        <div style="font-size:11px;color:#94a3b8">Total de costos</div>
       </div>
     </div>
 
-    <div class="dash-grid" style="margin-bottom:0">
-      <div class="dash-col">
-        <div class="card">
-          <div class="card-header">
-            <span class="card-title">Costos</span>
-            <span style="font-size:18px;color:var(--ink4);cursor:pointer">···</span>
-          </div>
-          <div class="card-body">
-            <div class="donut-wrap">
-              <canvas id="donutChart" class="donut-canvas"></canvas>
-              <div class="donut-legend">
-                ${donutLabels.map((l,i)=>`<div class="donut-leg-item"><div class="donut-dot" style="background:${donutColors[i]}"></div><span class="donut-leg-name">${l}</span><span class="donut-leg-val">${moneda}${formatNum(donutData[i].toFixed(0))}</span></div>`).join('')}
-                <div class="donut-leg-item" style="margin-top:4px;padding-top:4px;border-top:1px solid var(--border)"><div class="donut-dot" style="background:var(--green)"></div><span class="donut-leg-name" style="font-weight:700">Total de costos</span><span class="donut-leg-val" style="color:var(--ink)">${moneda}${formatNum(totalGastos.toFixed(0))}</span></div>
-              </div>
-            </div>
-            ${allCosts.length > 0 ? `<div style="font-size:12px;font-weight:700;color:var(--ink2);margin-bottom:8px">Gastos Variables</div>${costBars}` : ''}
-            <button onclick="switchPage('cargar')" style="margin-top:10px;background:none;border:none;color:var(--green);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;padding:0">› Ver todos los costos</button>
-          </div>
+    <!-- CHART + ALERTS ROW -->
+    <div style="display:grid;grid-template-columns:1fr 260px;gap:14px;margin-bottom:14px">
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.07);overflow:hidden">
+        <div style="padding:16px 18px 4px;display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:14px;font-weight:700;color:#0f172a">Ganancia Neta Mensual</span>
+          <span style="font-size:12px;color:#94a3b8;font-weight:600">${moneda}${formatNum(ganancia.toFixed(0))}</span>
+        </div>
+        <div style="padding:8px 4px 0;height:230px;position:relative"><canvas id="trendChart"></canvas></div>
+      </div>
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.07);overflow:hidden;display:flex;flex-direction:column">
+        <div style="background:#1e293b;color:#fff;padding:14px 16px;font-size:13px;font-weight:700;letter-spacing:.2px;flex-shrink:0">Alertas y Oportunidades</div>
+        <div style="padding:12px;display:flex;flex-direction:column;gap:10px;flex:1;overflow-y:auto">
+          ${buildAlertsPanel(margen, gastosPct, insumosPct, ticket, moneda)}
         </div>
       </div>
-      <div class="dash-col">
-        <div class="card">
-          <div class="card-header">
-            <span class="card-title">Resumen del mes</span>
-            <span style="font-size:18px;color:var(--ink4);cursor:pointer">···</span>
+    </div>
+
+    <!-- COSTOS + DETALLE ROW -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:4px">
+      <!-- Costos card -->
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.07);overflow:hidden">
+        <div style="padding:16px 18px 0;display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:14px;font-weight:700;color:#0f172a">Costos</span>
+          <span style="font-size:18px;color:#94a3b8;cursor:pointer;line-height:1">···</span>
+        </div>
+        <div style="padding:14px 18px">
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
+            <canvas id="donutChart" style="width:72px!important;height:72px!important;flex-shrink:0"></canvas>
+            <div style="display:flex;flex-direction:column;gap:4px;font-size:12px">
+              ${donutLabels.map((l,i)=>`<div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span style="color:#475569">${l}</span><span style="font-weight:700;color:#0f172a">${moneda}${formatNum(donutData[i].toFixed(0))}</span></div>`).join('')}
+              <div style="display:flex;align-items:center;gap:6px;margin-top:4px;padding-top:6px;border-top:1px solid #f1f5f9">
+                <div style="width:8px;height:8px;background:#10b981;border-radius:50%;flex-shrink:0"></div>
+                <span style="color:#475569;font-size:11px">Total de costos</span>
+                <span style="font-weight:700;color:#0f172a;margin-left:auto">${moneda}${formatNum(totalGastos.toFixed(0))}</span>
+              </div>
+            </div>
           </div>
-          <div class="card-body">
-            <div style="display:flex;flex-direction:column;gap:10px">
-              <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:var(--green-l);border-radius:9px;border:1px solid rgba(16,185,129,.15)">
-                <div><div style="font-size:12px;color:var(--ink3)">Ingresos totales</div><div style="font-size:17px;font-weight:800;color:var(--green)">${moneda}${formatNum(totalIngresos.toFixed(0))}</div></div>
-                <div style="font-size:22px">💰</div>
-              </div>
-              <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:var(--red-l);border-radius:9px;border:1px solid rgba(239,68,68,.15)">
-                <div><div style="font-size:12px;color:var(--ink3)">Gastos totales</div><div style="font-size:17px;font-weight:800;color:var(--red)">${moneda}${formatNum(totalGastos.toFixed(0))}</div></div>
-                <div style="font-size:22px">💸</div>
-              </div>
-              <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:var(--bg);border-radius:9px;border:1px solid var(--border)">
-                <div><div style="font-size:12px;color:var(--ink3)">Ticket promedio</div><div style="font-size:17px;font-weight:800;color:var(--ink)">${ticket>0?moneda+formatNum(ticket):'—'}</div></div>
-                <div style="font-size:22px">🎯</div>
-              </div>
+          ${allCosts.length > 0 ? `
+          <div style="font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Gastos Variables</div>
+          ${allCosts.slice(0,5).map((g,i) => `
+          <div style="display:flex;align-items:center;gap:8px;padding:4px 0">
+            <div style="width:8px;height:8px;border-radius:50%;background:${barColors[i%barColors.length]};flex-shrink:0"></div>
+            <span style="font-size:12px;color:#334155;flex:1">${g.nombre}</span>
+            <span style="font-size:12px;font-weight:700;color:#0f172a">${moneda}${formatNum(Number(g.monto).toFixed(0))}</span>
+          </div>`).join('')}
+          ` : ''}
+          <button onclick="switchPage('cargar')" style="margin-top:12px;background:none;border:none;color:#10b981;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;padding:0;display:flex;align-items:center;gap:4px">› Ver todos los costos</button>
+        </div>
+      </div>
+      <!-- Detalle / Resumen card -->
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.07);overflow:hidden">
+        <div style="padding:16px 18px 0;display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:14px;font-weight:700;color:#0f172a">Resumen del período</span>
+          <span style="font-size:18px;color:#94a3b8;cursor:pointer;line-height:1">···</span>
+        </div>
+        <div style="padding:14px 18px">
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#f8fafc;border-radius:9px;border:1px solid #f1f5f9">
+              <div style="width:34px;height:34px;background:#ecfdf5;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">💰</div>
+              <div style="flex:1"><div style="font-size:11px;color:#64748b">Ingresos totales</div><div style="font-size:15px;font-weight:800;color:#059669">${moneda}${formatNum(totalIngresos.toFixed(0))}</div></div>
             </div>
-            <div style="display:flex;gap:8px;margin-top:12px">
-              <button onclick="switchPage('chat')" style="flex:1;padding:9px;background:var(--green);color:#fff;border:none;border-radius:9px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer">🤖 Consejero IA</button>
-              <button onclick="switchPage('historial')" style="flex:1;padding:9px;background:var(--bg);color:var(--ink);border:1px solid var(--border);border-radius:9px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer">📈 Historial</button>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#f8fafc;border-radius:9px;border:1px solid #f1f5f9">
+              <div style="width:34px;height:34px;background:#fef2f2;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">💸</div>
+              <div style="flex:1"><div style="font-size:11px;color:#64748b">Gastos totales</div><div style="font-size:15px;font-weight:800;color:#ef4444">${moneda}${formatNum(totalGastos.toFixed(0))}</div></div>
             </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#f8fafc;border-radius:9px;border:1px solid #f1f5f9">
+              <div style="width:34px;height:34px;background:#eff6ff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">🎯</div>
+              <div style="flex:1"><div style="font-size:11px;color:#64748b">Ticket promedio</div><div style="font-size:15px;font-weight:800;color:#3b82f6">${ticket>0?moneda+formatNum(ticket):'—'}</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#f8fafc;border-radius:9px;border:1px solid #f1f5f9">
+              <div style="width:34px;height:34px;background:#fdf4ff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">👥</div>
+              <div style="flex:1"><div style="font-size:11px;color:#64748b">Clientes del mes</div><div style="font-size:15px;font-weight:800;color:#8b5cf6">${data.clientes||0}</div></div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:14px">
+            <button onclick="switchPage('chat')" style="flex:1;padding:9px;background:#10b981;color:#fff;border:none;border-radius:9px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer">🤖 Consejero IA</button>
+            <button onclick="switchPage('historial')" style="flex:1;padding:9px;background:#f8fafc;color:#334155;border:1px solid #e2e8f0;border-radius:9px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer">📈 Historial</button>
           </div>
         </div>
       </div>
@@ -1194,23 +1221,61 @@ function calcScore(margen, gastosPct, insumosPct) {
   return Math.min(100, Math.max(10, score));
 }
 
-function buildAlerts(data, margen, gastosPct, insumosPct, ticket, moneda) {
-  const alerts = [];
-  if (margen < 10) alerts.push({ type: 'urgent', icon: '🔴', title: 'Margen crítico', desc: `Tu margen de ${margen}% está por debajo del mínimo saludable. Necesitás reducir costos o aumentar precios urgente.`, badge: 'urgent' });
-  if (gastosPct > 85) alerts.push({ type: 'urgent', icon: '⚡', title: 'Gastos muy altos', desc: `Tus gastos representan el ${gastosPct}% de tus ventas. Por cada $100 que vendés, solo te quedan $${(100-gastosPct).toFixed(0)}.`, badge: 'urgent' });
-  if (insumosPct && insumosPct > 30) alerts.push({ type: 'urgent', icon: '📦', title: `Insumos al ${insumosPct}% de ventas`, desc: `El benchmark para tu rubro es 25-28%. Renegociá con proveedores o revisá tu estructura de costos.`, badge: 'urgent' });
-  if (margen >= 20) alerts.push({ type: 'opp', icon: '✅', title: 'Margen saludable', desc: `Tu margen del ${margen}% está en zona positiva. Buen momento para reinvertir o reservar para diciembre.`, badge: 'opp' });
-  if (ticket > 0) alerts.push({ type: 'plan', icon: '🎯', title: `Ticket promedio: ${moneda}${formatNum(ticket)}`, desc: `Agregar una opción premium podría subir tu ticket 15-20% sin conseguir más clientes.`, badge: 'plan' });
-  if (alerts.length === 0) alerts.push({ type: 'opp', icon: '📊', title: 'Números cargados', desc: 'Hablá con el Consejero IA para un análisis detallado y recomendaciones personalizadas.', badge: 'opp' });
+// Panel-style alerts (inside dark-header card) — match mockup exactly
+function buildAlertsPanel(margen, gastosPct, insumosPct, ticket, moneda) {
+  const cards = [];
 
-  return alerts.map(a => `
-    <div class="alert-card ${a.type}" onclick="switchPage('chat')">
-      <div class="alert-icon">${a.icon}</div>
-      <div>
-        <div class="alert-title">${a.title}</div>
-        <div class="alert-desc">${a.desc}</div>
-      </div>
-    </div>`).join('');
+  // Amber alert
+  if (margen < 25) {
+    cards.push(`
+      <div style="background:#fffbeb;border-radius:10px;padding:12px;display:flex;gap:10px;cursor:pointer" onclick="switchPage('chat')">
+        <div style="font-size:20px;flex-shrink:0;margin-top:1px">⚠️</div>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:#92400e;margin-bottom:3px">Tu Margen es Bajo</div>
+          <div style="font-size:11px;color:#78716c;line-height:1.55">Tu margen actual de ${margen}% podría ser mejor. Considerá ajustar tus precios a recupilir costos para aumentar tu ganancia.</div>
+        </div>
+      </div>`);
+  }
+
+  // Green opportunity
+  if (gastosPct > 40) {
+    cards.push(`
+      <div style="background:#ecfdf5;border-radius:10px;padding:12px;display:flex;gap:10px;cursor:pointer" onclick="switchPage('chat')">
+        <div style="font-size:20px;flex-shrink:0;margin-top:1px">🚀</div>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:#065f46;margin-bottom:3px">Optimizá tus Costos</div>
+          <div style="font-size:11px;color:#6b7280;line-height:1.55">Podrías reducir tus gastos del ${gastosPct}% de ventas negociando mejores tarifas con tus proveedores.</div>
+        </div>
+      </div>`);
+  }
+
+  if (ticket > 0) {
+    cards.push(`
+      <div style="background:#eff6ff;border-radius:10px;padding:12px;display:flex;gap:10px;cursor:pointer" onclick="switchPage('chat')">
+        <div style="font-size:20px;flex-shrink:0;margin-top:1px">🎯</div>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:#1e40af;margin-bottom:3px">Ticket Promedio: ${moneda}${formatNum(ticket)}</div>
+          <div style="font-size:11px;color:#6b7280;line-height:1.55">Agregar una opción premium podría subir tu ticket 15-20% sin conseguir más clientes.</div>
+        </div>
+      </div>`);
+  }
+
+  if (cards.length === 0) {
+    cards.push(`
+      <div style="background:#ecfdf5;border-radius:10px;padding:12px;display:flex;gap:10px;cursor:pointer" onclick="switchPage('chat')">
+        <div style="font-size:20px;flex-shrink:0;margin-top:1px">✅</div>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:#065f46;margin-bottom:3px">Negocio Saludable</div>
+          <div style="font-size:11px;color:#6b7280;line-height:1.55">Tu margen del ${margen}% está en zona óptima. Consultá el Consejero IA para seguir creciendo.</div>
+        </div>
+      </div>`);
+  }
+
+  return cards.join('');
+}
+
+function buildAlerts(data, margen, gastosPct, insumosPct, ticket, moneda) {
+  return buildAlertsPanel(margen, gastosPct, insumosPct, ticket, moneda);
 }
 
 // EXCEL IMPORT
