@@ -2,13 +2,21 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="ProfitPilot">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#10b981">
 <title>Profit Pilot — Tu consejero financiero</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{-webkit-overflow-scrolling:touch;overscroll-behavior-y:none}
+button,a{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 :root{
   --sb:#0f172a;--sb2:#1e293b;--sb-text:#94a3b8;--sb-active:#10b981;
   --bg:#f1f5f9;--surface:#fff;--border:#e2e8f0;
@@ -98,7 +106,7 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;font-size:14px;ba
 .main-content{flex:1;margin-left:200px;display:flex;flex-direction:column;min-height:100vh}
 
 /* HEADER */
-.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;padding-top:env(safe-area-inset-top,0px);height:calc(56px + env(safe-area-inset-top,0px));display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
 .topbar-left{display:flex;align-items:center;gap:12px}
 .topbar-biz{font-size:15px;font-weight:700;color:var(--ink)}
 .topbar-month{font-size:12px;background:var(--green-l);color:var(--green-d);font-weight:600;padding:4px 12px;border-radius:20px;border:1px solid rgba(16,185,129,.2)}
@@ -298,12 +306,39 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;font-size:14px;ba
 .hmc-metric-val{font-size:15px;font-weight:800;color:var(--ink);margin-bottom:2px}
 .hmc-metric-lbl{font-size:10px;color:var(--ink4);font-weight:600;text-transform:uppercase}
 
-/* BOTTOM NAV (mobile only) */
-.bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);z-index:100;padding:6px 0 env(safe-area-inset-bottom)}
-.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;border:none;background:none;color:var(--ink3);font-family:inherit;cursor:pointer;transition:.15s}
+/* BOTTOM NAV (mobile only) — iOS native style */
+.bottom-nav{
+  display:none;
+  position:fixed;bottom:0;left:0;right:0;
+  background:rgba(255,255,255,.92);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  backdrop-filter:blur(20px) saturate(180%);
+  border-top:1px solid rgba(0,0,0,.1);
+  z-index:100;
+  padding:8px 0 env(safe-area-inset-bottom,12px);
+}
+[data-theme="dark"] .bottom-nav{
+  background:rgba(15,23,42,.92);
+  border-top-color:rgba(255,255,255,.08);
+}
+.nav-btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:4px 0;border:none;background:none;
+  color:var(--ink4);font-family:inherit;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  transition:color .2s;
+  position:relative;
+}
 .nav-btn.active{color:var(--green)}
-.nav-icon{font-size:18px}
-.nav-lbl{font-size:10px;font-weight:600}
+.nav-btn:active{opacity:.6}
+.nav-icon-wrap{position:relative;display:flex;align-items:center;justify-content:center;width:44px;height:32px}
+.nav-pip{
+  position:absolute;bottom:-2px;left:50%;transform:translateX(-50%) scale(0);
+  width:4px;height:4px;border-radius:50%;background:var(--green);
+  transition:transform .2s cubic-bezier(.34,1.56,.64,1);
+}
+.nav-btn.active .nav-pip{transform:translateX(-50%) scale(1)}
+.nav-lbl{font-size:10px;font-weight:600;letter-spacing:.1px}
 
 /* TOAST */
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:600;opacity:0;transition:.3s;pointer-events:none;z-index:9999;white-space:nowrap}
@@ -348,23 +383,47 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;font-size:14px;ba
   .sidebar{display:none}
   .main-content{margin-left:0}
   .bottom-nav{display:flex}
-  .page-content{padding:16px;padding-bottom:80px}
+  .page-content{padding:16px 14px;padding-bottom:calc(80px + env(safe-area-inset-bottom,0px))}
   .kpi-grid{grid-template-columns:1fr 1fr}
   .dash-grid{grid-template-columns:1fr}
-  .topbar{padding:0 16px}
+  .topbar{padding:0 16px;height:52px}
   .topbar-search{display:none}
   .sb-hamburger{display:flex!important}
+  .stat-value{font-size:22px}
+  .stat-card{padding:16px}
+  .p-card-header{padding:14px 16px 0}
+  .p-card-body{padding:14px 16px}
+  .card-header-dark{padding:12px 14px}
 }
-@media(max-width:480px){
-  .kpi-grid{grid-template-columns:1fr 1fr}
+
+/* iPhone SE / small phones */
+@media(max-width:390px){
+  .kpi-grid{grid-template-columns:1fr 1fr;gap:10px}
+  .stat-value{font-size:20px}
+  .stat-label{font-size:10px}
+  .page-content{padding:12px 12px;padding-bottom:calc(80px + env(safe-area-inset-bottom,0px))}
+  .topbar-biz{font-size:14px}
+  .topbar-month{font-size:11px;padding:3px 9px}
 }
 
 /* MOBILE SIDEBAR DRAWER */
-.sb-hamburger{display:none;align-items:center;justify-content:center;width:36px;height:36px;border:none;background:none;font-size:20px;cursor:pointer;color:var(--ink);padding:0;flex-shrink:0}
-.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99;backdrop-filter:blur(2px)}
+.sb-hamburger{
+  display:none;align-items:center;justify-content:center;
+  width:36px;height:36px;border:none;background:none;
+  font-size:20px;cursor:pointer;color:var(--ink);padding:0;flex-shrink:0;
+  -webkit-tap-highlight-color:transparent;
+}
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
 .sb-overlay.show{display:block}
 @media(max-width:768px){
-  .sidebar{width:82vw;max-width:280px;transform:translateX(-82vw);transition:transform .3s cubic-bezier(.4,0,.2,1);z-index:200}
+  .sidebar{
+    width:82vw;max-width:280px;
+    transform:translateX(-82vw);
+    transition:transform .3s cubic-bezier(.4,0,.2,1);
+    z-index:200;
+    /* Safe area on left when open */
+    padding-top:env(safe-area-inset-top,0px);
+  }
   .sidebar.mobile-open{transform:translateX(0)}
 }
 .hidden{display:none!important}
@@ -380,7 +439,11 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;font-size:14px;ba
   --green-l:rgba(16,185,129,.12);--red-l:rgba(239,68,68,.12);
   --amber-l:rgba(245,158,11,.12);--blue-l:rgba(59,130,246,.12);
 }
-[data-theme="dark"] .topbar{background:#1e293b;border-color:#334155}
+[data-theme="dark"] .topbar{background:rgba(30,41,59,.92);border-color:#334155;-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px)}
+@media(max-width:768px){
+  .topbar{background:rgba(255,255,255,.92);-webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%)}
+  [data-theme="dark"] .topbar{background:rgba(15,23,42,.92)}
+}
 [data-theme="dark"] .p-card{background:#1e293b;border-color:#334155}
 [data-theme="dark"] .p-card:hover{box-shadow:0 8px 24px rgba(0,0,0,.4)}
 
@@ -779,21 +842,33 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;font-size:14px;ba
 </div><!-- /app-layout -->
 
   <!-- BOTTOM NAV (mobile) -->
-  <div class="bottom-nav">
+  <div class="bottom-nav" id="bottomNav">
     <button class="nav-btn active" onclick="switchPage('home')" id="navHomeM">
-      <span class="nav-icon">📊</span>
+      <span class="nav-icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        <span class="nav-pip"></span>
+      </span>
       <span class="nav-lbl">Inicio</span>
     </button>
     <button class="nav-btn" onclick="switchPage('cargar')" id="navCargarM">
-      <span class="nav-icon">➕</span>
+      <span class="nav-icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        <span class="nav-pip"></span>
+      </span>
       <span class="nav-lbl">Cargar</span>
     </button>
     <button class="nav-btn" onclick="switchPage('chat')" id="navChatM">
-      <span class="nav-icon">🤖</span>
+      <span class="nav-icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span class="nav-pip"></span>
+      </span>
       <span class="nav-lbl">Consejero</span>
     </button>
     <button class="nav-btn" onclick="switchPage('historial')" id="navHistorialM">
-      <span class="nav-icon">📈</span>
+      <span class="nav-icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <span class="nav-pip"></span>
+      </span>
       <span class="nav-lbl">Historial</span>
     </button>
   </div>
