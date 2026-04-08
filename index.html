@@ -368,6 +368,137 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;font-size:14px;ba
   .sidebar.mobile-open{transform:translateX(0)}
 }
 .hidden{display:none!important}
+
+/* ══════════════════════════════════════════
+   PREMIUM DASHBOARD — shadcn/ui quality
+   ══════════════════════════════════════════ */
+
+/* DARK MODE */
+[data-theme="dark"]{
+  --bg:#0f172a;--surface:#1e293b;--border:#334155;
+  --ink:#f1f5f9;--ink2:#e2e8f0;--ink3:#94a3b8;--ink4:#64748b;
+  --green-l:rgba(16,185,129,.12);--red-l:rgba(239,68,68,.12);
+  --amber-l:rgba(245,158,11,.12);--blue-l:rgba(59,130,246,.12);
+}
+[data-theme="dark"] .topbar{background:#1e293b;border-color:#334155}
+[data-theme="dark"] .p-card{background:#1e293b;border-color:#334155}
+[data-theme="dark"] .p-card:hover{box-shadow:0 8px 24px rgba(0,0,0,.4)}
+
+/* ANIMATIONS — Framer Motion quality */
+@keyframes fadeSlideUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes scaleIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+
+.ds-1{animation:fadeSlideUp .45s cubic-bezier(.22,1,.36,1) both}
+.ds-2{animation:fadeSlideUp .45s cubic-bezier(.22,1,.36,1) .08s both}
+.ds-3{animation:fadeSlideUp .45s cubic-bezier(.22,1,.36,1) .16s both}
+.ds-4{animation:fadeSlideUp .45s cubic-bezier(.22,1,.36,1) .24s both}
+.ds-5{animation:fadeSlideUp .45s cubic-bezier(.22,1,.36,1) .32s both}
+
+/* PREMIUM CARD */
+.p-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:14px;
+  box-shadow:0 1px 2px rgba(0,0,0,.04),0 2px 8px rgba(0,0,0,.04);
+  transition:box-shadow .2s ease,transform .2s ease;
+  overflow:hidden;
+}
+.p-card:hover{
+  box-shadow:0 4px 16px rgba(0,0,0,.08),0 1px 4px rgba(0,0,0,.04);
+  transform:translateY(-1px);
+}
+.p-card-header{padding:16px 20px 0;display:flex;align-items:center;justify-content:space-between}
+.p-card-title{font-size:13px;font-weight:600;color:var(--ink2);letter-spacing:-.1px}
+.p-card-body{padding:16px 20px}
+
+/* KPI STAT CARD */
+.stat-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:20px;
+  box-shadow:0 1px 2px rgba(0,0,0,.04),0 2px 8px rgba(0,0,0,.04);
+  transition:box-shadow .2s,transform .2s;
+  position:relative;
+  overflow:hidden;
+}
+.stat-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.08);transform:translateY(-1px)}
+.stat-label{font-size:11px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.stat-value{font-size:28px;font-weight:800;color:var(--ink);letter-spacing:-1px;line-height:1;font-variant-numeric:tabular-nums}
+.stat-sub{font-size:11px;color:var(--ink3);margin-top:8px}
+.stat-delta{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;margin-top:8px}
+.stat-delta.up{background:var(--green-l);color:var(--green-d)}
+.stat-delta.down{background:var(--red-l);color:var(--red)}
+.stat-card.featured{
+  background:linear-gradient(135deg,#065f46 0%,#059669 40%,#10b981 75%,#34d399 100%);
+  border:none;
+  box-shadow:0 8px 24px rgba(16,185,129,.32),0 2px 8px rgba(16,185,129,.2);
+}
+.stat-card.featured:hover{box-shadow:0 12px 32px rgba(16,185,129,.42);transform:translateY(-2px)}
+.stat-card.featured .stat-label{color:rgba(255,255,255,.75)}
+.stat-card.featured .stat-value{color:#fff}
+.stat-card.featured .stat-sub{color:rgba(255,255,255,.65)}
+.stat-card.featured .stat-delta{background:rgba(255,255,255,.18);color:#fff}
+
+/* ICON BADGE */
+.icon-badge{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.icon-badge svg{width:16px;height:16px}
+.icon-badge.green{background:var(--green-l);color:var(--green-d)}
+.icon-badge.red{background:var(--red-l);color:var(--red)}
+.icon-badge.amber{background:var(--amber-l);color:var(--amber)}
+.icon-badge.blue{background:var(--blue-l);color:var(--blue)}
+.icon-badge.purple{background:#f5f3ff;color:#7c3aed}
+
+/* BADGE */
+.px-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.1px}
+.px-badge.green{background:var(--green-l);color:var(--green-d)}
+.px-badge.amber{background:var(--amber-l);color:#b45309}
+.px-badge.red{background:var(--red-l);color:#b91c1c}
+.px-badge.blue{background:var(--blue-l);color:#1d4ed8}
+.px-badge.purple{background:#f5f3ff;color:#6d28d9}
+
+/* ALERT PANEL ITEMS */
+.alert-item{
+  display:flex;align-items:flex-start;gap:12px;
+  padding:12px 14px;border-radius:10px;cursor:pointer;
+  transition:filter .15s;
+}
+.alert-item:hover{filter:brightness(.97)}
+.alert-item.red{background:#fef2f2}
+.alert-item.amber{background:#fffbeb}
+.alert-item.green{background:#ecfdf5}
+.alert-item.blue{background:#eff6ff}
+[data-theme="dark"] .alert-item.red{background:rgba(239,68,68,.1)}
+[data-theme="dark"] .alert-item.amber{background:rgba(245,158,11,.1)}
+[data-theme="dark"] .alert-item.green{background:rgba(16,185,129,.1)}
+.alert-item-title{font-size:12px;font-weight:700;color:var(--ink);margin-bottom:3px}
+.alert-item-desc{font-size:11px;color:var(--ink3);line-height:1.55}
+
+/* PRODUCTS TABLE */
+.px-table{width:100%;border-collapse:collapse}
+.px-table th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--ink4);padding:8px 12px;text-align:left;border-bottom:1px solid var(--border)}
+.px-table td{padding:10px 12px;border-bottom:1px solid rgba(0,0,0,.04);font-size:13px;color:var(--ink2);vertical-align:middle}
+[data-theme="dark"] .px-table td{border-bottom-color:rgba(255,255,255,.04)}
+.px-table tr:last-child td{border-bottom:none}
+.px-table tr:hover td{background:rgba(0,0,0,.015)}
+[data-theme="dark"] .px-table tr:hover td{background:rgba(255,255,255,.025)}
+.prod-avatar{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+
+/* DONUT LEGEND */
+.donut-row{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:12px}
+.donut-row-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.donut-row-name{color:var(--ink2);flex:1}
+.donut-row-val{font-weight:700;color:var(--ink);font-size:12px}
+.donut-row-pct{color:var(--ink4);font-size:11px;margin-left:4px}
+
+/* DIVIDER */
+.px-divider{height:1px;background:var(--border);margin:12px 0}
+
+/* DARK MODE BUTTON */
+.dark-btn{width:34px;height:34px;border-radius:9px;border:1px solid var(--border);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:.15s;flex-shrink:0}
+.dark-btn:hover{background:var(--bg)}
 </style>
 </head>
 <body>
@@ -482,22 +613,22 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;font-size:14px;ba
     </div>
     <nav class="sb-nav">
       <button class="sb-item active" id="navHome" onclick="switchPage('home')">
-        <span class="sb-icon">⊞</span> Dashboard
+        <span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span> Dashboard
       </button>
       <button class="sb-item" id="navHistorial" onclick="switchPage('historial')">
-        <span class="sb-icon">💰</span> Ventas
+        <span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></span> Ventas
       </button>
       <button class="sb-item" id="navCargar" onclick="switchPage('cargar')">
-        <span class="sb-icon">💸</span> Costos
+        <span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></span> Cargar
       </button>
       <button class="sb-item" onclick="switchPage('historial')">
-        <span class="sb-icon">📋</span> Comisiones
+        <span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span> Comisiones
       </button>
       <button class="sb-item" onclick="switchPage('historial')">
-        <span class="sb-icon">📊</span> Análisis
+        <span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> Análisis
       </button>
       <button class="sb-item" id="navChat" onclick="switchPage('chat')">
-        <span class="sb-icon">🤖</span> AI Asistente
+        <span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M12 2a10 10 0 0 1 10 10 10 10 0 0 1-10 10c-1.7 0-3.3-.4-4.7-1.2L2 22l1.2-5.3A9.9 9.9 0 0 1 2 12 10 10 0 0 1 12 2z"/></svg></span> AI Asistente
       </button>
     </nav>
     <button class="sb-excel-btn" onclick="switchPage('cargar');setTimeout(()=>document.getElementById('excelFileInput').click(),300)">
@@ -531,8 +662,9 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;font-size:14px;ba
         <input type="text" placeholder="Buscar..." readonly onclick="switchPage('chat')">
       </div>
       <div class="topbar-right">
-        <div style="width:32px;height:32px;border-radius:8px;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer">🔔</div>
-        <div class="topbar-avatar" id="topbarAvatar">?</div>
+        <button class="dark-btn" id="darkModeBtn" onclick="toggleDarkMode()" title="Modo oscuro">🌙</button>
+        <div style="width:34px;height:34px;border-radius:9px;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;transition:.15s" onmouseenter="this.style.background='var(--bg)'" onmouseleave="this.style.background='var(--surface)'">🔔</div>
+        <div class="topbar-avatar" id="topbarAvatar" style="cursor:pointer" title="Mi cuenta">?</div>
       </div>
     </header>
 
@@ -997,21 +1129,55 @@ function renderChart() {
       plugins: {
         legend: {
           position: 'bottom',
-          labels: { font: { size: 11 }, boxWidth: 10, padding: 16, color: '#64748b',
-            usePointStyle: true, pointStyleWidth: 10 }
+          labels: { font: { size: 11, family: 'Inter' }, boxWidth: 8, padding: 20, color: '#94a3b8',
+            usePointStyle: true, pointStyleWidth: 8 }
         },
-        tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: $${ctx.parsed.y.toLocaleString('es-AR')}` } }
+        tooltip: {
+          backgroundColor: '#0f172a',
+          titleColor: '#94a3b8',
+          bodyColor: '#f1f5f9',
+          padding: 12,
+          borderColor: '#334155',
+          borderWidth: 1,
+          cornerRadius: 10,
+          titleFont: { size: 11 },
+          bodyFont: { size: 13, weight: '700' },
+          callbacks: { label: ctx => ` ${ctx.dataset.label}: $${ctx.parsed.y.toLocaleString('es-AR')}` }
+        }
       },
       scales: {
-        x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#94a3b8' } },
+        x: { grid: { display: false }, border: { display: false }, ticks: { font: { size: 11, family: 'Inter' }, color: '#94a3b8' } },
         y: {
-          grid: { color: 'rgba(0,0,0,0.04)', drawBorder: false },
-          ticks: { font: { size: 11 }, color: '#94a3b8', callback: v => '$' + (Math.abs(v)>=1000000?(v/1000000).toFixed(1)+'M':Math.abs(v)>=1000?(v/1000).toFixed(0)+'k':v) }
+          grid: { color: 'rgba(0,0,0,0.05)', drawBorder: false },
+          border: { display: false },
+          ticks: { font: { size: 11, family: 'Inter' }, color: '#94a3b8', callback: v => '$' + (Math.abs(v)>=1000000?(v/1000000).toFixed(1)+'M':Math.abs(v)>=1000?(v/1000).toFixed(0)+'k':v) }
         }
       }
     }
   });
 }
+
+// ─── COUNT-UP ANIMATION ───────────────────────────────────────────────────
+function countUp(el, target, duration, prefix, suffix) {
+  if (!el) return;
+  const start = performance.now();
+  const isNeg = target < 0;
+  const abs = Math.abs(target);
+  const ease = p => p === 1 ? 1 : 1 - Math.pow(2, -10 * p);
+  (function tick(now) {
+    const p = Math.min((now - start) / duration, 1);
+    const v = Math.round(ease(p) * abs) * (isNeg ? -1 : 1);
+    el.textContent = prefix + v.toLocaleString('es-AR') + suffix;
+    if (p < 1) requestAnimationFrame(tick);
+  })(start);
+}
+
+window.toggleDarkMode = () => {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  const btn = document.getElementById('darkModeBtn');
+  if (btn) btn.textContent = isDark ? '🌙' : '☀️';
+};
 
 function renderHome() {
   const content = document.getElementById('homeContent');
@@ -1066,136 +1232,175 @@ function renderHome() {
   const donutData = [...top3.map(g=>Number(g.monto)), ...(othersTotal>0?[othersTotal]:[])];
   const donutColors = ['#10b981','#3b82f6','#f59e0b','#94a3b8'];
 
-  // Responsive grids based on screen width
+  // Responsive grids
   const mob = window.innerWidth < 700;
   const kpiCols = mob ? '1fr 1fr' : '1fr 1fr 1fr';
-  const chartCols = mob ? '1fr' : '1fr 260px';
+  const chartCols = mob ? '1fr' : '1fr 1fr';
   const bottomCols = mob ? '1fr' : '1fr 1fr';
+
+  // Products (use actual cost items as proxy since we don't track products)
+  const products = allCosts.slice(0,4).map((g,i) => {
+    const pct = totalGastos > 0 ? ((Number(g.monto)/totalGastos)*100).toFixed(0) : 0;
+    const badges = ['green','blue','amber','purple'];
+    return {name: g.nombre, monto: Number(g.monto), pct, badge: badges[i%badges.length]};
+  });
 
   content.innerHTML = `
     <!-- HEALTH BANNER -->
-    <div style="background:linear-gradient(135deg,rgba(16,185,129,.1),rgba(16,185,129,.04));border:1px solid rgba(16,185,129,.22);border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:14px;margin-bottom:18px;box-shadow:0 2px 10px rgba(16,185,129,.07)">
-      <div style="width:28px;height:28px;background:#10b981;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700;flex-shrink:0">✓</div>
+    <div class="ds-1" style="background:linear-gradient(135deg,rgba(16,185,129,.08),rgba(16,185,129,.03));border:1px solid rgba(16,185,129,.2);border-radius:14px;padding:14px 20px;display:flex;align-items:center;gap:14px;margin-bottom:20px">
+      <div style="width:30px;height:30px;background:#10b981;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700;flex-shrink:0;box-shadow:0 4px 12px rgba(16,185,129,.3)">✓</div>
       <div style="flex:1;min-width:0">
-        <div style="font-size:13px;font-weight:800;color:#0f172a;text-transform:uppercase;letter-spacing:.6px">${score>=70?'NEGOCIO SALUDABLE':score>=50?'ATENCIÓN REQUERIDA':'SITUACIÓN CRÍTICA'}</div>
-        <div style="font-size:12px;color:#64748b;margin-top:2px">Tu margen está ${margen>=20?'por encima del promedio':'por debajo del promedio'} y estás ${ganancia>0?'generando ganancias consistentes':'perdiendo dinero este mes'}.</div>
+        <div style="font-size:13px;font-weight:700;color:var(--ink);letter-spacing:.3px">${score>=70?'Negocio Saludable':score>=50?'Atención Requerida':'Situación Crítica'}</div>
+        <div style="font-size:12px;color:var(--ink3);margin-top:2px">Tu margen está ${margen>=20?'por encima del promedio':'por debajo del promedio'} — ${ganancia>0?'generando ganancias consistentes':'requiere atención inmediata'}.</div>
       </div>
-      <button onclick="switchPage('chat')" style="padding:8px 16px;background:#10b981;color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;display:flex;align-items:center;gap:5px">Continuar <span>▼</span></button>
+      <button onclick="switchPage('chat')" style="padding:8px 16px;background:#10b981;color:#fff;border:none;border-radius:9px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:.15s" onmouseenter="this.style.background='#059669'" onmouseleave="this.style.background='#10b981'">Ver análisis →</button>
     </div>
 
     <!-- KPI CARDS -->
-    <div style="display:grid;grid-template-columns:${kpiCols};gap:14px;margin-bottom:18px">
-      <div style="background:linear-gradient(135deg,#059669 0%,#10b981 55%,#34d399 100%);border-radius:12px;padding:18px 20px;box-shadow:0 8px 24px rgba(16,185,129,.3);position:relative;overflow:hidden;${mob?'grid-column:1/-1':''}"  >
-        <div style="position:absolute;right:-18px;bottom:-18px;width:75px;height:75px;background:rgba(255,255,255,.08);border-radius:50%"></div>
-        <div style="position:absolute;right:38px;top:-12px;width:48px;height:48px;background:rgba(255,255,255,.06);border-radius:50%"></div>
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;position:relative">
-          <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.8);text-transform:uppercase;letter-spacing:.8px">Ganancia mensual</div>
-          <span style="font-size:14px;opacity:.55">📊</span>
+    <div class="ds-2" style="display:grid;grid-template-columns:${kpiCols};gap:16px;margin-bottom:20px">
+      <div class="stat-card featured" style="${mob?'grid-column:1/-1':''}">
+        <div style="position:absolute;right:-20px;bottom:-20px;width:80px;height:80px;background:rgba(255,255,255,.07);border-radius:50%"></div>
+        <div style="position:absolute;right:40px;top:-15px;width:50px;height:50px;background:rgba(255,255,255,.05);border-radius:50%"></div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;position:relative">
+          <div class="stat-label" style="color:rgba(255,255,255,.8)">Ganancia mensual</div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="2" width="16" height="16"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
         </div>
-        <div style="font-size:28px;font-weight:800;color:#fff;margin-bottom:6px;line-height:1;position:relative">${moneda}${formatNum(ganancia.toFixed(0))}</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.7);position:relative">Ganancia real</div>
+        <div class="stat-value" id="kpi-ganancia" style="position:relative;margin-top:4px">${moneda}${formatNum(ganancia.toFixed(0))}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;position:relative;margin-top:8px">
+          <span style="font-size:11px;color:rgba(255,255,255,.65)">Ganancia real</span>
+          <span class="stat-delta ${ganancia>0?'up':'down'}">${ganancia>0?'↑ Positiva':'↓ Pérdida'}</span>
+        </div>
       </div>
-      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px 20px;box-shadow:0 1px 4px rgba(0,0,0,.07)">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
-          <div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.8px">Margen</div>
-          <span style="font-size:14px;opacity:.35">📊</span>
+      <div class="stat-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div class="stat-label">Margen</div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--ink4)" stroke-width="2" width="16" height="16"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
         </div>
-        <div style="font-size:28px;font-weight:800;color:#0f172a;margin-bottom:6px;line-height:1">${margen}%</div>
-        <div style="font-size:11px;color:#94a3b8">Rentabilidad</div>
+        <div class="stat-value" id="kpi-margen" style="margin-top:4px">${margen}%</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+          <span class="stat-sub">Rentabilidad</span>
+          <span class="stat-delta ${margen>=15?'up':'down'}">${margen>=20?'✓ Saludable':margen>=10?'~ Ajustado':'⚠ Bajo'}</span>
+        </div>
       </div>
-      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px 20px;box-shadow:0 1px 4px rgba(0,0,0,.07)">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
-          <div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.8px">Costos</div>
-          <span style="font-size:14px;opacity:.35">📊</span>
+      <div class="stat-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div class="stat-label">Costos totales</div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--ink4)" stroke-width="2" width="16" height="16"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
         </div>
-        <div style="font-size:28px;font-weight:800;color:#0f172a;margin-bottom:6px;line-height:1">${moneda}${formatNum(totalGastos.toFixed(0))}</div>
-        <div style="font-size:11px;color:#94a3b8">Total de costos</div>
+        <div class="stat-value" id="kpi-costos" style="margin-top:4px">${moneda}${formatNum(totalGastos.toFixed(0))}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+          <span class="stat-sub">Total de costos</span>
+          <span class="stat-delta ${gastosPct<=80?'up':'down'}">${gastosPct}% ventas</span>
+        </div>
       </div>
     </div>
 
-    <!-- CHART + ALERTS ROW -->
-    <div style="display:grid;grid-template-columns:${chartCols};gap:14px;margin-bottom:14px">
-      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.07);overflow:hidden">
-        <div style="padding:16px 18px 4px;display:flex;justify-content:space-between;align-items:center">
-          <span style="font-size:14px;font-weight:700;color:#0f172a">Ganancia Neta Mensual</span>
-          <span style="font-size:12px;color:#94a3b8;font-weight:600">${moneda}${formatNum(ganancia.toFixed(0))}</span>
+    <!-- CHART + ALERTS -->
+    <div class="ds-3" style="display:grid;grid-template-columns:${chartCols};gap:16px;margin-bottom:16px">
+      <div class="p-card">
+        <div class="p-card-header">
+          <span class="p-card-title" style="font-size:14px;font-weight:700;color:var(--ink)">Ganancia Neta Mensual</span>
+          <span style="font-size:12px;color:var(--ink3);font-weight:600">${moneda}${formatNum(ganancia.toFixed(0))}</span>
         </div>
-        <div style="padding:8px 4px 0;height:230px;position:relative"><canvas id="trendChart"></canvas></div>
+        <div style="padding:8px 4px 0;height:240px;position:relative"><canvas id="trendChart"></canvas></div>
       </div>
-      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.07);overflow:hidden;display:flex;flex-direction:column">
-        <div style="background:#1e293b;color:#fff;padding:14px 16px;font-size:13px;font-weight:700;letter-spacing:.2px;flex-shrink:0">Alertas y Oportunidades</div>
-        <div style="padding:12px;display:flex;flex-direction:column;gap:10px;flex:1;overflow-y:auto">
+      <div class="p-card" style="display:flex;flex-direction:column;overflow:hidden">
+        <div style="background:#1e293b;color:#fff;padding:14px 20px;font-size:13px;font-weight:700;flex-shrink:0;border-radius:14px 14px 0 0">Alertas y Oportunidades</div>
+        <div style="padding:12px 14px;display:flex;flex-direction:column;gap:10px;flex:1">
           ${buildAlertsPanel(margen, gastosPct, insumosPct, ticket, moneda)}
         </div>
       </div>
     </div>
 
-    <!-- COSTOS + DETALLE ROW -->
-    <div style="display:grid;grid-template-columns:${bottomCols};gap:14px;margin-bottom:4px">
-      <!-- Costos card -->
-      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.07);overflow:hidden">
-        <div style="padding:16px 18px 0;display:flex;justify-content:space-between;align-items:center">
-          <span style="font-size:14px;font-weight:700;color:#0f172a">Costos</span>
-          <span style="font-size:18px;color:#94a3b8;cursor:pointer;line-height:1">···</span>
+    <!-- BOTTOM ROW: Costos + Productos -->
+    <div class="ds-4" style="display:grid;grid-template-columns:${bottomCols};gap:16px;margin-bottom:8px">
+      <!-- Costos / Donut -->
+      <div class="p-card">
+        <div class="p-card-header" style="margin-bottom:16px">
+          <span style="font-size:14px;font-weight:700;color:var(--ink)">Distribución de Costos</span>
+          <span style="font-size:13px;color:var(--ink4);cursor:pointer;letter-spacing:.5px">···</span>
         </div>
-        <div style="padding:14px 18px">
-          <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
-            <canvas id="donutChart" style="width:72px!important;height:72px!important;flex-shrink:0"></canvas>
-            <div style="display:flex;flex-direction:column;gap:4px;font-size:12px">
-              ${donutLabels.map((l,i)=>`<div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span style="color:#475569">${l}</span><span style="font-weight:700;color:#0f172a">${moneda}${formatNum(donutData[i].toFixed(0))}</span></div>`).join('')}
-              <div style="display:flex;align-items:center;gap:6px;margin-top:4px;padding-top:6px;border-top:1px solid #f1f5f9">
-                <div style="width:8px;height:8px;background:#10b981;border-radius:50%;flex-shrink:0"></div>
-                <span style="color:#475569;font-size:11px">Total de costos</span>
-                <span style="font-weight:700;color:#0f172a;margin-left:auto">${moneda}${formatNum(totalGastos.toFixed(0))}</span>
+        <div class="p-card-body" style="padding-top:0">
+          <div style="display:flex;gap:20px;align-items:center;margin-bottom:16px">
+            <canvas id="donutChart" style="width:80px!important;height:80px!important;flex-shrink:0"></canvas>
+            <div style="flex:1">
+              ${donutLabels.map((l,i)=>`
+              <div class="donut-row">
+                <div class="donut-row-dot" style="background:${donutColors[i]}"></div>
+                <span class="donut-row-name">${l}</span>
+                <span class="donut-row-val">${moneda}${formatNum(donutData[i].toFixed(0))}</span>
+                <span class="donut-row-pct">${totalGastos>0?((donutData[i]/totalGastos)*100).toFixed(0):0}%</span>
+              </div>`).join('')}
+              <div style="height:1px;background:var(--border);margin:8px 0"></div>
+              <div class="donut-row">
+                <div class="donut-row-dot" style="background:#10b981"></div>
+                <span class="donut-row-name" style="font-weight:700">Total</span>
+                <span class="donut-row-val">${moneda}${formatNum(totalGastos.toFixed(0))}</span>
               </div>
             </div>
           </div>
           ${allCosts.length > 0 ? `
-          <div style="font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Gastos Variables</div>
+          <div style="font-size:10px;font-weight:700;color:var(--ink4);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px">Detalle de gastos</div>
           ${allCosts.slice(0,5).map((g,i) => `
-          <div style="display:flex;align-items:center;gap:8px;padding:4px 0">
-            <div style="width:8px;height:8px;border-radius:50%;background:${barColors[i%barColors.length]};flex-shrink:0"></div>
-            <span style="font-size:12px;color:#334155;flex:1">${g.nombre}</span>
-            <span style="font-size:12px;font-weight:700;color:#0f172a">${moneda}${formatNum(Number(g.monto).toFixed(0))}</span>
-          </div>`).join('')}
-          ` : ''}
-          <button onclick="switchPage('cargar')" style="margin-top:12px;background:none;border:none;color:#10b981;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;padding:0;display:flex;align-items:center;gap:4px">› Ver todos los costos</button>
+          <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)">
+            <div style="width:7px;height:7px;border-radius:50%;background:${barColors[i%barColors.length]};flex-shrink:0"></div>
+            <span style="font-size:12px;color:var(--ink2);flex:1">${g.nombre}</span>
+            <span style="font-size:12px;font-weight:700;color:var(--ink)">${moneda}${formatNum(Number(g.monto).toFixed(0))}</span>
+          </div>`).join('')}` : '<div style="color:var(--ink3);font-size:13px">Sin datos de costos</div>'}
+          <button onclick="switchPage('cargar')" style="margin-top:14px;background:none;border:none;color:#10b981;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;padding:0;display:flex;align-items:center;gap:4px">› Ver todos los costos</button>
         </div>
       </div>
-      <!-- Detalle / Resumen card -->
-      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.07);overflow:hidden">
-        <div style="padding:16px 18px 0;display:flex;justify-content:space-between;align-items:center">
-          <span style="font-size:14px;font-weight:700;color:#0f172a">Resumen del período</span>
-          <span style="font-size:18px;color:#94a3b8;cursor:pointer;line-height:1">···</span>
+      <!-- Productos vendidos / Resumen -->
+      <div class="p-card">
+        <div class="p-card-header" style="margin-bottom:16px">
+          <span style="font-size:14px;font-weight:700;color:var(--ink)">Resumen del período</span>
+          <span style="font-size:13px;color:var(--ink4);cursor:pointer;letter-spacing:.5px">···</span>
         </div>
-        <div style="padding:14px 18px">
-          <div style="display:flex;flex-direction:column;gap:8px">
-            <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#f8fafc;border-radius:9px;border:1px solid #f1f5f9">
-              <div style="width:34px;height:34px;background:#ecfdf5;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">💰</div>
-              <div style="flex:1"><div style="font-size:11px;color:#64748b">Ingresos totales</div><div style="font-size:15px;font-weight:800;color:#059669">${moneda}${formatNum(totalIngresos.toFixed(0))}</div></div>
-            </div>
-            <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#f8fafc;border-radius:9px;border:1px solid #f1f5f9">
-              <div style="width:34px;height:34px;background:#fef2f2;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">💸</div>
-              <div style="flex:1"><div style="font-size:11px;color:#64748b">Gastos totales</div><div style="font-size:15px;font-weight:800;color:#ef4444">${moneda}${formatNum(totalGastos.toFixed(0))}</div></div>
-            </div>
-            <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#f8fafc;border-radius:9px;border:1px solid #f1f5f9">
-              <div style="width:34px;height:34px;background:#eff6ff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">🎯</div>
-              <div style="flex:1"><div style="font-size:11px;color:#64748b">Ticket promedio</div><div style="font-size:15px;font-weight:800;color:#3b82f6">${ticket>0?moneda+formatNum(ticket):'—'}</div></div>
-            </div>
-            <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#f8fafc;border-radius:9px;border:1px solid #f1f5f9">
-              <div style="width:34px;height:34px;background:#fdf4ff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">👥</div>
-              <div style="flex:1"><div style="font-size:11px;color:#64748b">Clientes del mes</div><div style="font-size:15px;font-weight:800;color:#8b5cf6">${data.clientes||0}</div></div>
-            </div>
-          </div>
-          <div style="display:flex;gap:8px;margin-top:14px">
-            <button onclick="switchPage('chat')" style="flex:1;padding:9px;background:#10b981;color:#fff;border:none;border-radius:9px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer">🤖 Consejero IA</button>
-            <button onclick="switchPage('historial')" style="flex:1;padding:9px;background:#f8fafc;color:#334155;border:1px solid #e2e8f0;border-radius:9px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer">📈 Historial</button>
+        <div class="p-card-body" style="padding-top:0">
+          <table class="px-table" style="margin-bottom:14px">
+            <thead><tr>
+              <th>Concepto</th>
+              <th style="text-align:right">Valor</th>
+              <th style="text-align:right">Estado</th>
+            </tr></thead>
+            <tbody>
+              <tr>
+                <td><div style="display:flex;align-items:center;gap:8px"><div class="icon-badge green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>Ingresos</div></td>
+                <td style="text-align:right;font-weight:700;color:var(--green-d)">${moneda}${formatNum(totalIngresos.toFixed(0))}</td>
+                <td style="text-align:right"><span class="px-badge green">↑ Total</span></td>
+              </tr>
+              <tr>
+                <td><div style="display:flex;align-items:center;gap:8px"><div class="icon-badge red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg></div>Gastos</div></td>
+                <td style="text-align:right;font-weight:700;color:#ef4444">${moneda}${formatNum(totalGastos.toFixed(0))}</td>
+                <td style="text-align:right"><span class="px-badge ${gastosPct<=80?'green':'red'}">${gastosPct}%</span></td>
+              </tr>
+              <tr>
+                <td><div style="display:flex;align-items:center;gap:8px"><div class="icon-badge ${ganancia>0?'green':'red'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>Ganancia</div></td>
+                <td style="text-align:right;font-weight:700;color:${ganancia>0?'var(--green-d)':'#ef4444'}">${moneda}${formatNum(ganancia.toFixed(0))}</td>
+                <td style="text-align:right"><span class="px-badge ${margen>=15?'green':margen>=10?'amber':'red'}">${margen}%</span></td>
+              </tr>
+              <tr>
+                <td><div style="display:flex;align-items:center;gap:8px"><div class="icon-badge blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>Clientes</div></td>
+                <td style="text-align:right;font-weight:700">${data.clientes||0}</td>
+                <td style="text-align:right"><span class="px-badge blue">${ticket>0?moneda+formatNum(ticket)+' ticket':'—'}</span></td>
+              </tr>
+            </tbody>
+          </table>
+          <div style="display:flex;gap:8px">
+            <button onclick="switchPage('chat')" style="flex:1;padding:10px;background:#10b981;color:#fff;border:none;border-radius:9px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:.15s" onmouseenter="this.style.background='#059669'" onmouseleave="this.style.background='#10b981'">🤖 Consejero IA</button>
+            <button onclick="switchPage('historial')" style="flex:1;padding:10px;background:var(--bg);color:var(--ink);border:1px solid var(--border);border-radius:9px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:.15s" onmouseenter="this.style.background='var(--border)'" onmouseleave="this.style.background='var(--bg)'">📈 Historial</button>
           </div>
         </div>
       </div>
     </div>
   `;
-  setTimeout(() => { renderChart(); renderDonut(donutData, donutLabels, donutColors); }, 50);
+  setTimeout(() => {
+    renderChart();
+    renderDonut(donutData, donutLabels, donutColors);
+    countUp(document.getElementById('kpi-ganancia'), ganancia, 1200, moneda, '');
+    countUp(document.getElementById('kpi-margen'), parseFloat(margen), 1200, '', '%');
+    countUp(document.getElementById('kpi-costos'), totalGastos, 1200, moneda, '');
+  }, 80);
 }
 
 let donutChart = null;
