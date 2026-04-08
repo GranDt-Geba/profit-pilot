@@ -79,31 +79,67 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;font-size:14px;ba
 #mainApp{display:none;min-height:100vh}
 .app-layout{display:flex;min-height:100vh}
 
-/* SIDEBAR */
-.sidebar{width:200px;background:linear-gradient(180deg,#0f172a 0%,#0d1526 100%);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100;flex-shrink:0;border-right:1px solid #1e293b}
-.sb-logo{padding:18px 16px 14px;border-bottom:1px solid rgba(255,255,255,.06)}
-.sb-logo-text{font-size:16px;font-weight:800;color:#fff;letter-spacing:.3px;display:flex;align-items:center;gap:6px}
+/* SIDEBAR DRAWER — always hidden, slide in on open */
+.sidebar{
+  width:280px;
+  background:#0f172a;
+  display:flex;flex-direction:column;
+  position:fixed;top:0;left:0;height:100vh;
+  z-index:300;
+  transform:translateX(-100%);
+  transition:transform .3s cubic-bezier(.4,0,.2,1);
+  overflow:hidden;
+}
+.sidebar.mobile-open{transform:translateX(0);box-shadow:8px 0 40px rgba(0,0,0,.4)}
+
+/* Drawer logo */
+.sb-logo{padding:20px 20px 16px;border-bottom:1px solid rgba(255,255,255,.07)}
+.sb-logo-text{font-size:18px;font-weight:800;color:#fff;letter-spacing:-.2px;display:flex;align-items:center;gap:8px}
 .sb-logo-text span{color:var(--green)}
-.sb-logo-sub{font-size:11px;color:var(--sb-text);margin-top:4px;padding-left:24px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sb-nav{flex:1;padding:10px 8px;display:flex;flex-direction:column;gap:1px;overflow-y:auto}
-.sb-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;color:var(--sb-text);cursor:pointer;transition:.15s;border:none;background:none;font-family:inherit;font-size:13px;font-weight:500;width:100%;text-align:left}
-.sb-item:hover{background:rgba(255,255,255,.06);color:#fff}
-.sb-item.active{background:rgba(16,185,129,.15);color:#fff;position:relative}
-.sb-item.active::before{content:'';position:absolute;left:0;top:20%;bottom:20%;width:3px;background:var(--green);border-radius:0 3px 3px 0}
-.sb-item .sb-icon{font-size:15px;width:18px;text-align:center;flex-shrink:0}
-.sb-excel-btn{margin:8px 8px 0;padding:9px 12px;background:var(--green);color:#fff;border:none;border-radius:9px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:.2s;display:flex;align-items:center;gap:7px;justify-content:center}
+.sb-logo-sub{font-size:11px;color:#64748b;margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* Drawer nav items */
+.sb-nav{flex:1;padding:12px 10px;display:flex;flex-direction:column;gap:2px;overflow-y:auto}
+.sb-item{
+  display:flex;align-items:center;gap:12px;
+  padding:11px 12px;border-radius:10px;
+  color:#94a3b8;cursor:pointer;
+  transition:background .15s,color .15s;
+  border:none;background:none;
+  font-family:inherit;font-size:14px;font-weight:500;
+  width:100%;text-align:left;
+  -webkit-tap-highlight-color:transparent;
+}
+.sb-item:hover{background:rgba(255,255,255,.07);color:#e2e8f0}
+.sb-item:active{background:rgba(255,255,255,.1)}
+.sb-item.active{background:rgba(16,185,129,.14);color:#fff;position:relative}
+.sb-item.active::before{content:'';position:absolute;left:0;top:18%;bottom:18%;width:3px;background:var(--green);border-radius:0 3px 3px 0}
+.sb-item .sb-icon{width:20px;height:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0;opacity:.8}
+.sb-item.active .sb-icon{opacity:1}
+
+/* Excel button */
+.sb-excel-btn{
+  margin:0 10px 12px;padding:12px;
+  background:var(--green);color:#fff;border:none;border-radius:10px;
+  font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;
+  transition:background .2s;display:flex;align-items:center;gap:8px;justify-content:center;
+  -webkit-tap-highlight-color:transparent;
+}
 .sb-excel-btn:hover{background:var(--green-d)}
-.sb-bottom{padding:8px 8px 12px;border-top:1px solid rgba(255,255,255,.06)}
-.sb-user{display:flex;align-items:center;gap:8px;padding:8px 10px}
-.sb-avatar{width:28px;height:28px;background:var(--green);border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:12px;flex-shrink:0}
+.sb-excel-btn:active{background:#047857}
+
+/* Drawer bottom */
+.sb-bottom{padding:10px 10px calc(12px + env(safe-area-inset-bottom,0px));border-top:1px solid rgba(255,255,255,.07)}
+.sb-user{display:flex;align-items:center;gap:10px;padding:10px 12px;margin-bottom:4px}
+.sb-avatar{width:32px;height:32px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:13px;flex-shrink:0}
 .sb-user-info{flex:1;min-width:0}
-.sb-user-name{font-size:12px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sb-user-role{font-size:10px;color:var(--sb-text)}
-.sb-logout{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:8px;color:var(--sb-text);cursor:pointer;font-size:12px;font-weight:500;transition:.15s;border:none;background:none;font-family:inherit;width:100%;margin-top:2px}
+.sb-user-name{font-size:13px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-user-role{font-size:11px;color:#64748b}
+.sb-logout{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;color:#94a3b8;cursor:pointer;font-size:13px;font-weight:500;transition:.15s;border:none;background:none;font-family:inherit;width:100%;-webkit-tap-highlight-color:transparent}
 .sb-logout:hover{background:rgba(239,68,68,.1);color:#f87171}
 
-/* MAIN CONTENT */
-.main-content{flex:1;margin-left:200px;display:flex;flex-direction:column;min-height:100vh}
+/* MAIN CONTENT — always full width (no sidebar margin) */
+.main-content{flex:1;margin-left:0;display:flex;flex-direction:column;min-height:100vh}
 
 /* HEADER */
 .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;padding-top:env(safe-area-inset-top,0px);height:calc(56px + env(safe-area-inset-top,0px));display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
@@ -306,39 +342,6 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;font-size:14px;ba
 .hmc-metric-val{font-size:15px;font-weight:800;color:var(--ink);margin-bottom:2px}
 .hmc-metric-lbl{font-size:10px;color:var(--ink4);font-weight:600;text-transform:uppercase}
 
-/* BOTTOM NAV (mobile only) — iOS native style */
-.bottom-nav{
-  display:none;
-  position:fixed;bottom:0;left:0;right:0;
-  background:rgba(255,255,255,.92);
-  -webkit-backdrop-filter:blur(20px) saturate(180%);
-  backdrop-filter:blur(20px) saturate(180%);
-  border-top:1px solid rgba(0,0,0,.1);
-  z-index:100;
-  padding:8px 0 env(safe-area-inset-bottom,12px);
-}
-[data-theme="dark"] .bottom-nav{
-  background:rgba(15,23,42,.92);
-  border-top-color:rgba(255,255,255,.08);
-}
-.nav-btn{
-  flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;
-  padding:4px 0;border:none;background:none;
-  color:var(--ink4);font-family:inherit;cursor:pointer;
-  -webkit-tap-highlight-color:transparent;
-  transition:color .2s;
-  position:relative;
-}
-.nav-btn.active{color:var(--green)}
-.nav-btn:active{opacity:.6}
-.nav-icon-wrap{position:relative;display:flex;align-items:center;justify-content:center;width:44px;height:32px}
-.nav-pip{
-  position:absolute;bottom:-2px;left:50%;transform:translateX(-50%) scale(0);
-  width:4px;height:4px;border-radius:50%;background:var(--green);
-  transition:transform .2s cubic-bezier(.34,1.56,.64,1);
-}
-.nav-btn.active .nav-pip{transform:translateX(-50%) scale(1)}
-.nav-lbl{font-size:10px;font-weight:600;letter-spacing:.1px}
 
 /* TOAST */
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:600;opacity:0;transition:.3s;pointer-events:none;z-index:9999;white-space:nowrap}
@@ -374,21 +377,13 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;font-size:14px;ba
 /* DASHBOARD GRID - wider chart column */
 .dash-grid{display:grid;grid-template-columns:1fr 300px;gap:16px;margin-bottom:16px}
 
-/* RESPONSIVE */
-@media(max-width:900px){
-  .sidebar{width:180px}
-  .main-content{margin-left:180px}
-}
+/* RESPONSIVE — tablet/desktop layout adjustments */
 @media(max-width:768px){
-  .sidebar{display:none}
-  .main-content{margin-left:0}
-  .bottom-nav{display:flex}
-  .page-content{padding:16px 14px;padding-bottom:calc(80px + env(safe-area-inset-bottom,0px))}
+  .page-content{padding:16px 14px;padding-bottom:24px}
   .kpi-grid{grid-template-columns:1fr 1fr}
   .dash-grid{grid-template-columns:1fr}
-  .topbar{padding:0 16px;height:52px}
+  .topbar{padding:0 16px;height:calc(52px + env(safe-area-inset-top,0px))}
   .topbar-search{display:none}
-  .sb-hamburger{display:flex!important}
   .stat-value{font-size:22px}
   .stat-card{padding:16px}
   .p-card-header{padding:14px 16px 0}
@@ -401,31 +396,25 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;font-size:14px;ba
   .kpi-grid{grid-template-columns:1fr 1fr;gap:10px}
   .stat-value{font-size:20px}
   .stat-label{font-size:10px}
-  .page-content{padding:12px 12px;padding-bottom:calc(80px + env(safe-area-inset-bottom,0px))}
+  .page-content{padding:12px 12px 24px}
   .topbar-biz{font-size:14px}
   .topbar-month{font-size:11px;padding:3px 9px}
 }
 
-/* MOBILE SIDEBAR DRAWER */
+/* HAMBURGER BUTTON — always visible */
 .sb-hamburger{
-  display:none;align-items:center;justify-content:center;
+  display:flex;align-items:center;justify-content:center;
   width:36px;height:36px;border:none;background:none;
-  font-size:20px;cursor:pointer;color:var(--ink);padding:0;flex-shrink:0;
+  cursor:pointer;color:var(--ink);padding:0;flex-shrink:0;
   -webkit-tap-highlight-color:transparent;
+  border-radius:8px;transition:background .15s;
 }
-.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.sb-hamburger:hover{background:var(--border)}
+.sb-hamburger:active{background:var(--border);opacity:.7}
+
+/* OVERLAY — behind drawer on all screen sizes */
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:299;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
 .sb-overlay.show{display:block}
-@media(max-width:768px){
-  .sidebar{
-    width:82vw;max-width:280px;
-    transform:translateX(-82vw);
-    transition:transform .3s cubic-bezier(.4,0,.2,1);
-    z-index:200;
-    /* Safe area on left when open */
-    padding-top:env(safe-area-inset-top,0px);
-  }
-  .sidebar.mobile-open{transform:translateX(0)}
-}
 .hidden{display:none!important}
 
 /* ══════════════════════════════════════════
@@ -668,47 +657,68 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;font-size:14px;ba
 <div id="mainApp">
 <div class="app-layout">
 
-  <!-- SIDEBAR -->
+  <!-- SIDEBAR DRAWER -->
   <aside class="sidebar" id="mainSidebar">
+    <!-- Logo -->
     <div class="sb-logo">
-      <div class="sb-logo-text">🚀 Profit<span>Pilot</span></div>
+      <div class="sb-logo-text">
+        <svg viewBox="0 0 24 24" fill="none" width="22" height="22"><path d="M12 2L8.5 8.5 2 9.27l4.5 4.37L5.18 20 12 16.4 18.82 20l-1.32-6.36L22 9.27l-6.5-.77L12 2z" fill="#10b981" stroke="#10b981" stroke-width="1.5" stroke-linejoin="round"/></svg>
+        Profit<span>Pilot</span>
+      </div>
       <div class="sb-logo-sub" id="homeBizName">Tu negocio</div>
     </div>
+
+    <!-- Nav items -->
     <nav class="sb-nav">
       <button class="sb-item active" id="navHome" onclick="switchPage('home')">
-        <span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span> Dashboard
+        <span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span>
+        Dashboard
       </button>
       <button class="sb-item" id="navHistorial" onclick="switchPage('historial')">
-        <span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></span> Ventas
+        <span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></span>
+        Ventas
       </button>
-      <button class="sb-item" id="navCargar" onclick="switchPage('cargar')">
-        <span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></span> Cargar
+      <button class="sb-item" onclick="showToast('Costos — próximamente')">
+        <span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
+        Costos
+      </button>
+      <button class="sb-item" onclick="showToast('Comisiones — próximamente')">
+        <span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><circle cx="12" cy="8" r="5"/><path d="M3 21v-2a7 7 0 0 1 7-7h4a7 7 0 0 1 7 7v2"/></svg></span>
+        Comisiones
       </button>
       <button class="sb-item" onclick="switchPage('historial')">
-        <span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span> Comisiones
-      </button>
-      <button class="sb-item" onclick="switchPage('historial')">
-        <span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> Análisis
+        <span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
+        Análisis
       </button>
       <button class="sb-item" id="navChat" onclick="switchPage('chat')">
-        <span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M12 2a10 10 0 0 1 10 10 10 10 0 0 1-10 10c-1.7 0-3.3-.4-4.7-1.2L2 22l1.2-5.3A9.9 9.9 0 0 1 2 12 10 10 0 0 1 12 2z"/></svg></span> AI Asistente
+        <span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+        AI Asistente
       </button>
     </nav>
-    <button class="sb-excel-btn" onclick="switchPage('cargar');setTimeout(()=>document.getElementById('excelFileInput').click(),300)">
-      + Subir Excel
+
+    <!-- Upload Excel button -->
+    <button class="sb-excel-btn" onclick="switchPage('cargar');setTimeout(()=>document.getElementById('excelFileInput').click(),400)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Subir Excel
     </button>
+
+    <!-- Bottom section -->
     <div class="sb-bottom">
-      <button class="sb-item" onclick="switchPage('cargar')">
-        <span class="sb-icon">🔗</span> Vincular MercadoLibre
-      </button>
-      <div class="sb-user" style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.06)">
+      <div class="sb-user">
         <div class="sb-avatar" id="navAvatar">?</div>
         <div class="sb-user-info">
           <div class="sb-user-name" id="sbUserName">Usuario</div>
           <div class="sb-user-role">Dueño</div>
         </div>
       </div>
-      <button class="sb-logout" onclick="handleLogout()">🚪 Cerrar sesión</button>
+      <button class="sb-item" onclick="switchPage('cargar')">
+        <span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07M8.46 8.46a5 5 0 0 0 0 7.07"/></svg></span>
+        Configuración
+      </button>
+      <button class="sb-logout" onclick="handleLogout()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Cerrar sesión
+      </button>
     </div>
   </aside>
 
@@ -716,7 +726,9 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;font-size:14px;ba
   <div class="main-content">
     <header class="topbar">
       <div class="topbar-left">
-        <button class="sb-hamburger" id="sbHamburger" onclick="toggleSidebar()">☰</button>
+        <button class="sb-hamburger" id="sbHamburger" onclick="toggleSidebar()" aria-label="Menú">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="20" height="20"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
         <span class="topbar-biz" id="topbarBiz">Mi Negocio</span>
         <span class="topbar-month" id="navMonth"></span>
       </div>
@@ -841,37 +853,6 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;font-size:14px;ba
   </div><!-- /main-content -->
 </div><!-- /app-layout -->
 
-  <!-- BOTTOM NAV (mobile) -->
-  <div class="bottom-nav" id="bottomNav">
-    <button class="nav-btn active" onclick="switchPage('home')" id="navHomeM">
-      <span class="nav-icon-wrap">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
-        <span class="nav-pip"></span>
-      </span>
-      <span class="nav-lbl">Inicio</span>
-    </button>
-    <button class="nav-btn" onclick="switchPage('cargar')" id="navCargarM">
-      <span class="nav-icon-wrap">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-        <span class="nav-pip"></span>
-      </span>
-      <span class="nav-lbl">Cargar</span>
-    </button>
-    <button class="nav-btn" onclick="switchPage('chat')" id="navChatM">
-      <span class="nav-icon-wrap">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        <span class="nav-pip"></span>
-      </span>
-      <span class="nav-lbl">Consejero</span>
-    </button>
-    <button class="nav-btn" onclick="switchPage('historial')" id="navHistorialM">
-      <span class="nav-icon-wrap">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-        <span class="nav-pip"></span>
-      </span>
-      <span class="nav-lbl">Historial</span>
-    </button>
-  </div>
 </div>
 <!-- SIDEBAR OVERLAY (mobile) -->
 <div class="sb-overlay" id="sbOverlay" onclick="toggleSidebar()"></div>
@@ -2041,14 +2022,11 @@ INSTRUCCIONES:
 // PAGE SWITCHING
 window.switchPage = (page) => {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.sb-item').forEach(b => b.classList.remove('active'));
   const pageEl = document.getElementById(`page${page.charAt(0).toUpperCase()+page.slice(1)}`);
   if (pageEl) pageEl.classList.add('active');
   const navEl = document.getElementById(`nav${page.charAt(0).toUpperCase()+page.slice(1)}`);
   if (navEl) navEl.classList.add('active');
-  const navElM = document.getElementById(`nav${page.charAt(0).toUpperCase()+page.slice(1)}M`);
-  if (navElM) navElM.classList.add('active');
   PP.currentPage = page;
   if (page === 'chat') renderChat();
   if (page === 'home') renderHome();
