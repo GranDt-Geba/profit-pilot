@@ -551,6 +551,7 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;font-size:14px;ba
 
 /* DIVIDER */
 .px-divider{height:1px;background:var(--border);margin:12px 0}
+.personal-flag[data-excluded="1"]{opacity:.55;background:#f0fdf4!important;border-color:#bbf7d0!important}
 
 /* MONTH NAVIGATOR */
 .month-nav{display:flex;align-items:center;gap:2px;flex-shrink:0}
@@ -1707,14 +1708,16 @@ async function analyzeExcelWithAI(csvText, fileName) {
 
   const systemPrompt = `Sos un analista financiero experto en pymes. Analizás un Excel de un negocio de rubro "${rubro}" y extraés TODOS los meses de datos presentes.
 
-REGLAS:
-- Detectá si hay datos de uno o varios meses (buscá columnas de fecha, mes o período)
-- Si hay múltiples meses, analizá CADA UNO por separado
-- Si no hay fechas claras, tratalo como un solo mes e intentá inferirlo del nombre del archivo "${fileName}" o usá el mes/año actuales
-- Separar ingresos de gastos; fijos = se repiten (alquiler, sueldos); variables = cambian (insumos, publicidad)
-- Detectar gastos personales o duplicados como alertas
-- Formato numérico argentino: PUNTO = separador de miles, COMA = decimal. $200.000 = 200000
-- El campo "key" DEBE tener formato "MesEnEspañol YYYY" (ej: "Abril 2026", "Marzo 2026")
+REGLAS CRÍTICAS:
+1. SIEMPRE incluí el 100% de los gastos encontrados en gastosFixed o gastosVar — NUNCA omitas ninguno
+2. Si un gasto es personal, igual lo ponés en gastosVar Y lo marcás en alertas con tipo "personal"
+3. El usuario decide si incluirlo o no — vos solo marcalo como alerta
+4. Gastos SIEMPRE personales (siempre agregar alerta personal): Netflix, Spotify, Disney+, Amazon Prime, HBO, Apple TV, gimnasio, farmacia personal, supermercado personal
+5. Gastos AMBIGUOS (marcar como personal solo si no hay indicios de uso empresarial): Rappi, PedidosYa, Uber, combustible, celular
+6. Si hay múltiples meses, analizá CADA UNO por separado
+7. Si no hay fechas claras, usá el nombre del archivo "${fileName}" o el mes/año actual para inferir el período
+8. Fijos = se repiten (alquiler, sueldos); variables = cambian (insumos, publicidad, delivery)
+9. El campo "key" DEBE tener formato "MesEnEspañol YYYY" (ej: "Abril 2026")
 
 Respondé SOLO con JSON válido:
 {
@@ -1762,37 +1765,94 @@ Respondé SOLO con JSON válido:
   }
 }
 
-function showExcelResults(data) {
-  document.getElementById('excelAnalyzing').classList.remove('show');
+// Track user decisions on personal expenses: { "Netflix": true=include, false=exclude }
+const personalChoices = {};
+
+function recalcSummary() {
+  const data = excelAnalyzedData;
+  if (!data) return;
   const months = data.months || [data];
   const moneda = PP.bizProfile?.moneda?.split(' ')[1] || '$';
-
   const totalVentas = months.reduce((a,m) => a + Number(m.ventas||0), 0);
-  const totalGastos = months.reduce((a,m) =>
-    a + [...(m.gastosFixed||[]), ...(m.gastosVar||[])].reduce((s,g) => s+Number(g.monto||0), 0), 0);
+  const totalGastos = months.reduce((a,m) => {
+    return a + [...(m.gastosFixed||[]), ...(m.gastosVar||[])].reduce((s,g) => {
+      // Exclude if user chose to exclude this personal expense
+      if (personalChoices[g.nombre] === false) return s;
+      return s + Number(g.monto||0);
+    }, 0);
+  }, 0);
   const ganancia = totalVentas - totalGastos;
+  const monedaSym = moneda;
+  const el = document.getElementById('excelResultsSummary');
+  if (el) el.innerHTML =
+    (months[0].resumen || '') +
+    `<br><strong>Ventas: ${monedaSym}${formatNum(totalVentas)}</strong> · ` +
+    `Gastos: ${monedaSym}${formatNum(totalGastos)} · ` +
+    `Ganancia: ${monedaSym}${formatNum(ganancia)}`;
+}
+
+window.togglePersonal = (nombre, btn) => {
+  const isIncluded = personalChoices[nombre] !== false; // default = included
+  personalChoices[nombre] = !isIncluded; // toggle
+  const nowIncluded = personalChoices[nombre] !== false;
+  btn.closest('.personal-flag').dataset.excluded = nowIncluded ? '' : '1';
+  btn.textContent = nowIncluded ? 'Excluir del negocio' : 'Incluir en el negocio';
+  btn.style.background = nowIncluded ? '#fef2f2' : '#ecfdf5';
+  btn.style.color = nowIncluded ? '#b91c1c' : '#065f46';
+  btn.style.borderColor = nowIncluded ? '#fca5a5' : '#6ee7b7';
+  recalcSummary();
+};
+
+function showExcelResults(data) {
+  document.getElementById('excelAnalyzing').classList.remove('show');
+  // Reset choices
+  Object.keys(personalChoices).forEach(k => delete personalChoices[k]);
+
+  const months = data.months || [data];
+  const moneda = PP.bizProfile?.moneda?.split(' ')[1] || '$';
 
   document.getElementById('excelResultsHeader').textContent = months.length > 1
     ? `${months.length} meses detectados · ${months.map(m=>m.key).join(', ')}`
     : `Análisis completado · ${(months[0].gastosFixed||[]).length + (months[0].gastosVar||[]).length} gastos encontrados`;
 
-  document.getElementById('excelResultsSummary').innerHTML =
-    (months[0].resumen || '') +
-    `<br><strong>Ventas: ${moneda}${formatNum(totalVentas)}</strong> · ` +
-    `Gastos: ${moneda}${formatNum(totalGastos)} · ` +
-    `Ganancia: ${moneda}${formatNum(ganancia)}`;
+  recalcSummary();
 
-  const allAlertas = months.flatMap(m => (m.alertas||[]).map(a => ({...a, mes: m.key})));
+  // Build personal expense review UI
+  const allPersonal = months.flatMap(m =>
+    (m.alertas||[]).filter(a => a.tipo === 'personal').map(a => ({...a, mes: m.key}))
+  );
+  const otherAlertas = months.flatMap(m =>
+    (m.alertas||[]).filter(a => a.tipo !== 'personal').map(a => ({...a, mes: m.key}))
+  );
+
   const flagsEl = document.getElementById('excelFlags');
-  if (!allAlertas.length) {
-    flagsEl.innerHTML = '<div class="excel-flag info"><div class="excel-flag-title">Todo limpio</div>No detecté gastos personales ni anomalías.</div>';
-  } else {
-    flagsEl.innerHTML = allAlertas.slice(0,5).map(a => `
-      <div class="excel-flag ${a.tipo}">
-        <div class="excel-flag-title">${a.tipo==='personal'?'⚠️ Gasto personal':a.tipo==='duplicado'?'🔴 Duplicado':'ℹ️ Info'}: ${a.item}${a.monto?` · ${moneda}${formatNum(a.monto)}`:''}${a.mes?` (${a.mes})`:''}</div>
+  let html = '';
+
+  if (allPersonal.length) {
+    html += `<div style="font-size:11px;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">⚠️ Gastos posiblemente personales — ¿los incluís en el negocio?</div>`;
+    html += allPersonal.map(a => `
+      <div class="personal-flag" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fffbeb;border-radius:10px;margin-bottom:6px;border:1px solid #fde68a">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;font-weight:700;color:#78350f">${a.item}${a.monto ? ` · ${moneda}${formatNum(a.monto)}` : ''}</div>
+          <div style="font-size:11px;color:#92400e;margin-top:2px">${a.mensaje||'Detectado como posible gasto personal'}</div>
+        </div>
+        <button onclick="togglePersonal('${a.item}', this)" style="flex-shrink:0;padding:6px 10px;border-radius:8px;border:1px solid #fca5a5;background:#fef2f2;color:#b91c1c;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;transition:.15s">Excluir del negocio</button>
+      </div>`).join('');
+  }
+
+  if (otherAlertas.length) {
+    html += otherAlertas.map(a => `
+      <div class="excel-flag ${a.tipo}" style="margin-top:6px">
+        <div class="excel-flag-title">${a.tipo==='duplicado'?'🔴 Duplicado':'ℹ️ Info'}: ${a.item}${a.monto?` · ${moneda}${formatNum(a.monto)}`:''}${a.mes?` (${a.mes})`:''}</div>
         ${a.mensaje}
       </div>`).join('');
   }
+
+  if (!html) {
+    html = '<div class="excel-flag info"><div class="excel-flag-title">Todo limpio</div>No detecté gastos personales ni anomalías.</div>';
+  }
+
+  flagsEl.innerHTML = html;
   document.getElementById('excelResults').classList.add('show');
 }
 
@@ -1807,11 +1867,14 @@ window.applyExcelData = async () => {
       const key = m.key;
       if (!key) continue;
       const parts = key.split(' ');
+      // Apply user's personal expense choices: exclude what they marked as personal
+      const filterPersonal = arr => (arr||[]).filter(g => personalChoices[g.nombre] !== false);
       const data = {
         mes: parts[0], anio: parts[1]||String(new Date().getFullYear()), monthKey: key,
         ventas: Number(m.ventas||0), clientes: Number(m.clientes||0),
         otrosIngresos: Number(m.otrosIngresos||0),
-        gastosFixed: m.gastosFixed||[], gastosVar: m.gastosVar||[],
+        gastosFixed: filterPersonal(m.gastosFixed),
+        gastosVar: filterPersonal(m.gastosVar),
         savedAt: new Date().toISOString()
       };
       await setDoc(doc(db, 'users', PP.user.uid, 'months', key), data);
