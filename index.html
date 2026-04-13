@@ -1673,8 +1673,21 @@ function processExcelFile(file) {
       const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
 
       // Limit rows to avoid huge prompts
-      const trimmed = rows.filter(r => r.some(c => c !== '')).slice(0, 100);
-      const csvText = trimmed.map(r => r.join('\t')).join('\n');
+      const trimmed = rows.filter(r => r.some(c => c !== '')).slice(0, 150);
+
+      // Normalize Argentine number format BEFORE sending to AI
+      // "$200.000" → "200000", "$1.500.000" → "1500000", "50.000,50" → "50000.50"
+      const normalizeCell = (cell) => {
+        if (typeof cell === 'number') return cell; // XLSX already parsed it correctly
+        const s = String(cell);
+        // Match currency patterns: optional $ + digits with dot-thousands + optional comma-decimal
+        return s.replace(/\$?\s*(\d{1,3}(?:\.\d{3})+)(?:,(\d{1,2}))?/g, (_, num, dec) => {
+          const integer = num.replace(/\./g, '');
+          return dec ? integer + '.' + dec : integer;
+        });
+      };
+
+      const csvText = trimmed.map(r => r.map(normalizeCell).join('\t')).join('\n');
 
       await analyzeExcelWithAI(csvText, file.name);
     } catch(err) {
