@@ -558,6 +558,17 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;font-size:14px;ba
 /* DIVIDER */
 .px-divider{height:1px;background:var(--border);margin:12px 0}
 
+/* MONTH NAVIGATOR */
+.month-nav{display:flex;align-items:center;gap:2px;flex-shrink:0}
+.mn-arrow{width:26px;height:26px;border:none;background:none;border-radius:7px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--green-d);transition:.15s;-webkit-tap-highlight-color:transparent;flex-shrink:0}
+.mn-arrow:hover{background:var(--green-l)}
+.mn-arrow:active{opacity:.6}
+.mn-arrow:disabled{opacity:.25;cursor:default;pointer-events:none}
+.mn-label{font-size:12px;font-weight:700;padding:4px 10px;border-radius:20px;background:var(--green-l);color:var(--green-d);border:1px solid rgba(16,185,129,.2);cursor:pointer;white-space:nowrap;min-width:88px;text-align:center;transition:.2s;-webkit-tap-highlight-color:transparent}
+.mn-label:hover{background:var(--green);color:#fff}
+.mn-label.all-mode{background:var(--green);color:#fff;min-width:110px}
+@media(max-width:390px){.mn-label{font-size:11px;padding:3px 7px;min-width:72px}.topbar-biz{display:none}}
+
 /* DARK MODE BUTTON */
 .dark-btn{width:34px;height:34px;border-radius:9px;border:1px solid var(--border);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:.15s;flex-shrink:0}
 .dark-btn:hover{background:var(--bg)}
@@ -744,7 +755,15 @@ document.addEventListener('dblclick', function(e){ e.preventDefault(); }, {passi
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="20" height="20"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         </button>
         <span class="topbar-biz" id="topbarBiz">Mi Negocio</span>
-        <span class="topbar-month" id="navMonth"></span>
+        <div class="month-nav" id="monthNav" style="display:none">
+          <button class="mn-arrow" id="mnPrev" onclick="navigateMonth(-1)" title="Mes anterior">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <span class="mn-label" id="navMonth" onclick="navigateMonth('all')" title="Ver todo el período"></span>
+          <button class="mn-arrow" id="mnNext" onclick="navigateMonth(1)" title="Mes siguiente">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
       </div>
       <div class="topbar-search">
         <span class="topbar-search-icon">🔍</span>
@@ -1053,8 +1072,9 @@ function initApp() {
   document.getElementById('navAvatar').textContent = initial;
   document.getElementById('topbarBiz').textContent = p.nombre;
   document.getElementById('topbarAvatar').textContent = initial;
-  PP.currentMonth = PP.currentMonth || getCurrentMonthKey();
-  document.getElementById('navMonth').textContent = PP.currentMonth;
+  const availableKeys = getMonthKeys();
+  PP.currentMonth = availableKeys.length ? availableKeys[availableKeys.length - 1] : (PP.currentMonth || getCurrentMonthKey());
+  updateNavBar();
   updateCurrencySymbols();
   renderMonthSelector();
   renderHome();
@@ -1090,7 +1110,7 @@ function renderMonthSelector() {
       const btn = document.createElement('button');
       btn.className = `month-chip ${PP.currentMonth === key ? 'active' : ''} ${hasData ? 'has-data' : ''}`;
       btn.textContent = `${m.slice(0,3)} ${y}`;
-      btn.onclick = () => { PP.currentMonth = key; document.getElementById('navMonth').textContent = key; renderMonthSelector(); renderHome(); };
+      btn.onclick = () => { PP.currentMonth = key; updateNavBar(); renderMonthSelector(); renderHome(); };
       sel.appendChild(btn);
     });
   });
@@ -1242,6 +1262,56 @@ function countUp(el, target, duration, prefix, suffix) {
   })(start);
 }
 
+// MONTH NAVIGATION
+const MONTH_NAMES_ES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+function getMonthKeys() {
+  return Object.keys(PP.monthsData).sort((a, b) => {
+    const [ma, ya] = a.split(' ');
+    const [mb, yb] = b.split(' ');
+    return (parseInt(ya)*12 + MONTH_NAMES_ES.indexOf(ma)) - (parseInt(yb)*12 + MONTH_NAMES_ES.indexOf(mb));
+  });
+}
+
+function updateNavBar() {
+  const nav = document.getElementById('monthNav');
+  const label = document.getElementById('navMonth');
+  const prevBtn = document.getElementById('mnPrev');
+  const nextBtn = document.getElementById('mnNext');
+  if (!nav) return;
+  const keys = getMonthKeys();
+  if (!keys.length) { nav.style.display = 'none'; return; }
+  nav.style.display = 'flex';
+  if (PP.currentMonth === '_all') {
+    if (label) { label.textContent = 'Todo el período'; label.classList.add('all-mode'); }
+    if (prevBtn) prevBtn.disabled = false;
+    if (nextBtn) nextBtn.disabled = true;
+  } else {
+    const idx = keys.indexOf(PP.currentMonth);
+    if (label) { label.textContent = PP.currentMonth || ''; label.classList.remove('all-mode'); }
+    if (prevBtn) prevBtn.disabled = (idx <= 0);
+    if (nextBtn) nextBtn.disabled = false;
+  }
+}
+
+window.navigateMonth = (dir) => {
+  const keys = getMonthKeys();
+  if (!keys.length) return;
+  if (dir === 'all') {
+    PP.currentMonth = PP.currentMonth === '_all' ? keys[keys.length - 1] : '_all';
+  } else if (PP.currentMonth === '_all') {
+    PP.currentMonth = keys[keys.length - 1];
+  } else {
+    const idx = keys.indexOf(PP.currentMonth);
+    const newIdx = idx + dir;
+    if (newIdx < 0) return;
+    PP.currentMonth = newIdx >= keys.length ? '_all' : keys[newIdx];
+  }
+  PP.chatHistory = [];
+  updateNavBar();
+  renderHome();
+};
+
 window.toggleDarkMode = () => {
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
@@ -1251,14 +1321,35 @@ window.toggleDarkMode = () => {
 
 function renderHome() {
   const content = document.getElementById('homeContent');
-  const data = PP.monthsData[PP.currentMonth];
+
+  // _all mode: aggregate all months
+  let data;
+  if (PP.currentMonth === '_all') {
+    const allKeys = getMonthKeys();
+    if (!allKeys.length) {
+      content.innerHTML = `<div class="no-data-card"><div class="no-data-icon">📊</div><div class="no-data-title">Sin datos todavía</div><div class="no-data-sub">Subí tu Excel y la IA analiza todo automáticamente.</div><button class="btn-add-data" onclick="switchPage('cargar')">+ Subir Excel</button></div>`;
+      return;
+    }
+    const allData = allKeys.map(k => PP.monthsData[k]);
+    data = {
+      ventas: allData.reduce((a,d) => a+Number(d.ventas||0), 0),
+      clientes: allData.reduce((a,d) => a+Number(d.clientes||0), 0),
+      otrosIngresos: allData.reduce((a,d) => a+Number(d.otrosIngresos||0), 0),
+      gastosFixed: allData.flatMap(d => d.gastosFixed||[]),
+      gastosVar: allData.flatMap(d => d.gastosVar||[]),
+      _isAll: true, _months: allKeys.length
+    };
+  } else {
+    data = PP.monthsData[PP.currentMonth];
+  }
+
   if (!data) {
     content.innerHTML = `
       <div class="no-data-card">
         <div class="no-data-icon">📊</div>
         <div class="no-data-title">Sin datos para ${PP.currentMonth}</div>
-        <div class="no-data-sub">Cargá los números de este mes y la IA te dice qué hacer.</div>
-        <button class="btn-add-data" onclick="switchPage('cargar')">+ Cargar números</button>
+        <div class="no-data-sub">Subí tu Excel y la IA analiza todo automáticamente.</div>
+        <button class="btn-add-data" onclick="switchPage('cargar')">+ Subir Excel</button>
       </div>`;
     return;
   }
@@ -1602,38 +1693,37 @@ function processExcelFile(file) {
 }
 
 async function analyzeExcelWithAI(csvText, fileName) {
-  const moneda = PP.bizProfile?.moneda?.split(' ')[1] || '$';
   const rubro = PP.bizProfile?.rubro || 'negocio';
+  const currentYear = new Date().getFullYear();
 
-  const systemPrompt = `Sos un analista financiero experto en pymes argentinas. Tu tarea es analizar datos de un Excel de un negocio de rubro "${rubro}" y extraer información financiera estructurada.
+  const systemPrompt = `Sos un analista financiero experto en pymes. Analizás un Excel de un negocio de rubro "${rubro}" y extraés TODOS los meses de datos presentes.
 
-REGLAS IMPORTANTES:
-- Separar claramente ingresos de gastos
-- Identificar si un gasto es personal/del hogar (Netflix, Spotify, supermercado personal, farmacia personal, gimnasio personal, etc.) y marcarlo como alerta
-- Identificar gastos duplicados y marcarlos como alerta
-- Los gastos fijos son los que se repiten mes a mes (alquiler, sueldos, servicios)
-- Los gastos variables son los que cambian (materiales, insumos, publicidad)
-- Si no podés determinar si algo es fijo o variable, ponerlo como variable
-- Ignorar filas vacías, totales, subtotales (no duplicar)
-- IMPORTANTE: Los números usan formato argentino donde el PUNTO es separador de miles y la COMA es decimal. Ejemplos: $200.000 = 200000, $1.500.000 = 1500000, $50.000 = 50000. Nunca interpretes el punto como decimal en estos números.
+REGLAS:
+- Detectá si hay datos de uno o varios meses (buscá columnas de fecha, mes o período)
+- Si hay múltiples meses, analizá CADA UNO por separado
+- Si no hay fechas claras, tratalo como un solo mes e intentá inferirlo del nombre del archivo "${fileName}" o usá el mes/año actuales
+- Separar ingresos de gastos; fijos = se repiten (alquiler, sueldos); variables = cambian (insumos, publicidad)
+- Detectar gastos personales o duplicados como alertas
+- Formato numérico argentino: PUNTO = separador de miles, COMA = decimal. $200.000 = 200000
+- El campo "key" DEBE tener formato "MesEnEspañol YYYY" (ej: "Abril 2026", "Marzo 2026")
 
-Respondé ÚNICAMENTE con un JSON válido con esta estructura exacta:
+Respondé SOLO con JSON válido:
 {
-  "ventas": <número o 0>,
-  "clientes": <número o 0>,
-  "otrosIngresos": <número o 0>,
-  "gastosFixed": [{"nombre": "...", "monto": <número>}],
-  "gastosVar": [{"nombre": "...", "monto": <número>}],
-  "alertas": [{"tipo": "personal"|"duplicado"|"info", "item": "...", "monto": <número o 0>, "mensaje": "..."}],
-  "resumen": "..."
+  "months": [
+    {
+      "key": "Abril 2026",
+      "ventas": 0,
+      "clientes": 0,
+      "otrosIngresos": 0,
+      "gastosFixed": [{"nombre": "...", "monto": 0}],
+      "gastosVar": [{"nombre": "...", "monto": 0}],
+      "alertas": [{"tipo": "personal", "item": "...", "monto": 0, "mensaje": "..."}],
+      "resumen": "..."
+    }
+  ]
 }`;
 
-  const userMsg = `Archivo: ${fileName}
-
-Datos del Excel (separados por tabs):
-${csvText}
-
-Analizá y respondé solo con el JSON.`;
+  const userMsg = `Archivo: ${fileName}\nAño actual: ${currentYear}\n\nDatos (separados por tabs):\n${csvText}\n\nRespondé solo con el JSON.`;
 
   try {
     const response = await fetch(WORKER_URL, {
@@ -1641,7 +1731,7 @@ Analizá y respondé solo con el JSON.`;
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 1500,
+        max_tokens: 3000,
         system: systemPrompt,
         messages: [{ role: 'user', content: userMsg }]
       })
@@ -1649,12 +1739,12 @@ Analizá y respondé solo con el JSON.`;
 
     const res = await response.json();
     const text = res.content?.[0]?.text || '';
-
-    // Extract JSON from response
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error('No JSON in response');
 
-    excelAnalyzedData = JSON.parse(jsonMatch[0]);
+    const parsed = JSON.parse(jsonMatch[0]);
+    // Support both old single-month and new multi-month format
+    excelAnalyzedData = parsed.months ? parsed : { months: [{ ...parsed, key: parsed.key || getCurrentMonthKey() }] };
     showExcelResults(excelAnalyzedData);
   } catch(err) {
     document.getElementById('excelAnalyzing').classList.remove('show');
@@ -1665,53 +1755,76 @@ Analizá y respondé solo con el JSON.`;
 
 function showExcelResults(data) {
   document.getElementById('excelAnalyzing').classList.remove('show');
-
-  const totalGastos = [...(data.gastosFixed||[]), ...(data.gastosVar||[])]
-    .reduce((a, g) => a + Number(g.monto||0), 0);
-  const ganancia = Number(data.ventas||0) - totalGastos;
+  const months = data.months || [data];
   const moneda = PP.bizProfile?.moneda?.split(' ')[1] || '$';
 
-  document.getElementById('excelResultsHeader').textContent =
-    `Análisis completado · ${(data.gastosFixed||[]).length + (data.gastosVar||[]).length} gastos encontrados`;
+  const totalVentas = months.reduce((a,m) => a + Number(m.ventas||0), 0);
+  const totalGastos = months.reduce((a,m) =>
+    a + [...(m.gastosFixed||[]), ...(m.gastosVar||[])].reduce((s,g) => s+Number(g.monto||0), 0), 0);
+  const ganancia = totalVentas - totalGastos;
+
+  document.getElementById('excelResultsHeader').textContent = months.length > 1
+    ? `${months.length} meses detectados · ${months.map(m=>m.key).join(', ')}`
+    : `Análisis completado · ${(months[0].gastosFixed||[]).length + (months[0].gastosVar||[]).length} gastos encontrados`;
 
   document.getElementById('excelResultsSummary').innerHTML =
-    data.resumen + `<br><strong>Ventas: ${moneda}${formatNum(data.ventas)}</strong> · ` +
+    (months[0].resumen || '') +
+    `<br><strong>Ventas: ${moneda}${formatNum(totalVentas)}</strong> · ` +
     `Gastos: ${moneda}${formatNum(totalGastos)} · ` +
-    `Ganancia estimada: ${moneda}${formatNum(ganancia)}`;
+    `Ganancia: ${moneda}${formatNum(ganancia)}`;
 
+  const allAlertas = months.flatMap(m => (m.alertas||[]).map(a => ({...a, mes: m.key})));
   const flagsEl = document.getElementById('excelFlags');
-  if ((data.alertas||[]).length === 0) {
+  if (!allAlertas.length) {
     flagsEl.innerHTML = '<div class="excel-flag info"><div class="excel-flag-title">Todo limpio</div>No detecté gastos personales ni anomalías.</div>';
   } else {
-    flagsEl.innerHTML = data.alertas.map(a => `
+    flagsEl.innerHTML = allAlertas.slice(0,5).map(a => `
       <div class="excel-flag ${a.tipo}">
-        <div class="excel-flag-title">${a.tipo === 'personal' ? '⚠️ Posible gasto personal' : a.tipo === 'duplicado' ? '🔴 Duplicado' : 'ℹ️ Info'}: ${a.item}${a.monto ? ` · ${moneda}${formatNum(a.monto)}` : ''}</div>
+        <div class="excel-flag-title">${a.tipo==='personal'?'⚠️ Gasto personal':a.tipo==='duplicado'?'🔴 Duplicado':'ℹ️ Info'}: ${a.item}${a.monto?` · ${moneda}${formatNum(a.monto)}`:''}${a.mes?` (${a.mes})`:''}</div>
         ${a.mensaje}
       </div>`).join('');
   }
-
   document.getElementById('excelResults').classList.add('show');
 }
 
-window.applyExcelData = () => {
+window.applyExcelData = async () => {
   if (!excelAnalyzedData) return;
-  const d = excelAnalyzedData;
+  const months = excelAnalyzedData.months || [excelAnalyzedData];
+  const btn = document.querySelector('.btn-apply-excel');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Guardando...'; }
 
-  // Fill income fields
-  if (d.ventas) document.getElementById('ventas').value = d.ventas;
-  if (d.clientes) document.getElementById('clientes').value = d.clientes;
-  if (d.otrosIngresos) document.getElementById('otrosIngresos').value = d.otrosIngresos;
-
-  // Clear and fill expense lists
-  document.getElementById('gastosFixedList').innerHTML = '';
-  document.getElementById('gastosVarList').innerHTML = '';
-  (d.gastosFixed||[]).forEach(g => addLineItem('fixed', g.nombre, g.monto));
-  (d.gastosVar||[]).forEach(g => addLineItem('var', g.nombre, g.monto));
-
-  document.getElementById('excelResults').classList.remove('show');
-  document.getElementById('excelZone').style.display = '';
-  excelAnalyzedData = null;
-  showToast('✓ Formulario completado con los datos del Excel');
+  try {
+    for (const m of months) {
+      const key = m.key;
+      if (!key) continue;
+      const parts = key.split(' ');
+      const data = {
+        mes: parts[0], anio: parts[1]||String(new Date().getFullYear()), monthKey: key,
+        ventas: Number(m.ventas||0), clientes: Number(m.clientes||0),
+        otrosIngresos: Number(m.otrosIngresos||0),
+        gastosFixed: m.gastosFixed||[], gastosVar: m.gastosVar||[],
+        savedAt: new Date().toISOString()
+      };
+      await setDoc(doc(db, 'users', PP.user.uid, 'months', key), data);
+      PP.monthsData[key] = data;
+    }
+    const keys = getMonthKeys();
+    PP.currentMonth = keys[keys.length - 1] || months[0]?.key;
+    PP.chatHistory = [];
+    document.getElementById('excelResults').classList.remove('show');
+    document.getElementById('excelZone').style.display = '';
+    excelAnalyzedData = null;
+    updateNavBar();
+    renderMonthSelector();
+    renderHome();
+    renderHistorial();
+    renderChat();
+    switchPage('home');
+    showToast(`✓ ${months.length > 1 ? months.length + ' meses guardados' : (months[0]?.key||'Datos') + ' guardado'}`);
+  } catch(e) {
+    showToast('Error al guardar. Intentá de nuevo.');
+  }
+  if (btn) { btn.disabled = false; btn.textContent = '✓ Aplicar datos'; }
 };
 
 window.discardExcel = () => {
@@ -1769,11 +1882,11 @@ window.saveMonthData = async () => {
     PP.currentMonth = monthKey;
     PP.chatHistory = [];
     showToast('✓ Datos guardados correctamente');
+    updateNavBar();
     renderMonthSelector();
     renderHome();
     renderHistorial();
     renderChat();
-    document.getElementById('navMonth').textContent = monthKey;
     switchPage('home');
     btn.disabled = false; btn.innerHTML = '✦ Analizar este mes';
   } catch(e) {
@@ -1812,10 +1925,10 @@ window.deleteMonth = async (key) => {
     await deleteDoc(doc(db, 'users', PP.user.uid, 'months', key));
     delete PP.monthsData[key];
     if (PP.currentMonth === key) {
-      const remaining = Object.keys(PP.monthsData).sort().reverse();
+      const remaining = getMonthKeys().reverse();
       PP.currentMonth = remaining[0] || null;
-      document.getElementById('navMonth').textContent = PP.currentMonth || '';
     }
+    updateNavBar();
     renderHistorial();
     renderMonthSelector();
     renderHome();
@@ -1841,7 +1954,7 @@ function renderHistorial() {
     const margen = totalIngresos > 0 ? ((ganancia/totalIngresos)*100).toFixed(1) : 0;
     const score = calcScore(margen, totalIngresos > 0 ? ((totalGastos/totalIngresos)*100).toFixed(1) : 100, null);
     return `
-      <div class="history-month-card" onclick="PP.currentMonth='${key}';document.getElementById('navMonth').textContent='${key}';renderMonthSelector();renderHome();switchPage('home')">
+      <div class="history-month-card" onclick="PP.currentMonth='${key}';updateNavBar();renderMonthSelector();renderHome();switchPage('home')">
         <div class="hmc-top">
           <div class="hmc-month">${key}</div>
           <div class="hmc-actions">
