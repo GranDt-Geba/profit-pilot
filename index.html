@@ -156,12 +156,6 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;font-size:14px;ba
 .page.active{display:block}
 
 /* MONTH SELECTOR */
-.month-selector{display:flex;gap:6px;overflow-x:auto;padding:0 0 12px;margin-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
-.month-selector::-webkit-scrollbar{display:none}
-.month-chip{padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--surface);font-family:inherit;font-size:12px;font-weight:600;color:var(--ink3);cursor:pointer;white-space:nowrap;transition:.15s;flex-shrink:0}
-.month-chip:hover{border-color:var(--green);color:var(--green)}
-.month-chip.active{background:var(--green);color:#fff;border-color:var(--green)}
-.month-chip.has-data{border-color:rgba(16,185,129,.4)}
 
 /* HEALTH BANNER */
 .health-banner{border-radius:var(--radius);padding:16px 20px;display:flex;align-items:center;gap:16px;margin-bottom:20px}
@@ -780,7 +774,7 @@ document.addEventListener('dblclick', function(e){ e.preventDefault(); }, {passi
 
       <!-- HOME PAGE -->
       <div class="page active" id="pageHome">
-        <div class="month-selector" id="monthSelector"></div>
+        <div id="monthSelector" style="display:none"></div>
         <div id="homeContent"></div>
       </div>
 
