@@ -1676,20 +1676,21 @@ function processExcelFile(file) {
     );
   };
 
-  const sheetToText = (sheetName, wb) => {
+  const sheetToText = (sheetName, wb, maxRows) => {
     const sheet = wb.Sheets[sheetName];
     const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '', raw: false });
-    return rows.filter(r => r.some(c => c !== '')).slice(0, 120)
+    return rows.filter(r => r.some(c => c !== '')).slice(0, maxRows)
       .map(r => r.map(normalizeCell).join('\t')).join('\n');
   };
 
   const scoreSheet = (name, text) => {
-    let score = { pnl: 0, income: 0, expense: 0 };
-    const headerLine = text.split('\n').slice(0, 3).join(' ');
-    if (PNL_KW.test(name) || PNL_KW.test(headerLine)) score.pnl += 10;
-    if (INCOME_KW.test(name) || INCOME_KW.test(headerLine)) score.income += 5;
-    if (EXPENSE_KW.test(name) || EXPENSE_KW.test(headerLine)) score.expense += 5;
-    return score;
+    // Scan sheet name + first 6 rows for classification keywords
+    const scan = name + ' ' + text.split('\n').slice(0, 6).join(' ');
+    return {
+      pnl:     PNL_KW.test(scan)     ? 10 : 0,
+      income:  INCOME_KW.test(scan)  ? 5  : 0,
+      expense: EXPENSE_KW.test(scan) ? 5  : 0,
+    };
   };
 
   const reader = new FileReader();
@@ -1699,22 +1700,27 @@ function processExcelFile(file) {
       const workbook = XLSX.read(data, { type: 'array' });
       const names = workbook.SheetNames;
 
+      // Distribute row budget across all sheets (max 400 rows total)
+      const rowsPerSheet = Math.max(40, Math.floor(400 / names.length));
+
       const scored = names.map(name => {
-        const text = sheetToText(name, workbook);
-        const s = scoreSheet(name, text);
-        return { name, text, ...s };
+        const text = sheetToText(name, workbook, rowsPerSheet);
+        return { name, text, ...scoreSheet(name, text) };
       });
 
-      const pnl     = scored.filter(s => s.pnl > 0).sort((a,b) => b.pnl - a.pnl);
-      const income  = scored.filter(s => s.income > 0 && s.pnl === 0).sort((a,b) => b.income - a.income);
-      const expense = scored.filter(s => s.expense > 0 && s.pnl === 0).sort((a,b) => b.expense - a.expense);
-      const rest    = scored.filter(s => s.pnl === 0 && s.income === 0 && s.expense === 0);
+      // Build ordered list prioritizing P&L > income > expense > rest
+      // Use a Set to deduplicate — a sheet can match multiple categories
+      const seen = new Set();
+      const addUnique = arr => arr.filter(s => !seen.has(s.name) && seen.add(s.name));
 
-      const hasExpenseSheet = expense.length > 0 || pnl.length > 0;
+      const ordered = [
+        ...addUnique(scored.filter(s => s.pnl > 0).sort((a,b) => b.pnl - a.pnl)),
+        ...addUnique(scored.filter(s => s.income > 0).sort((a,b) => b.income - a.income)),
+        ...addUnique(scored.filter(s => s.expense > 0).sort((a,b) => b.expense - a.expense)),
+        ...addUnique(scored), // remaining unclassified sheets
+      ];
 
-      // Prioritize: P&L > income > expense > rest; max 3 sections to stay in token budget
-      const ordered = [...pnl, ...income, ...expense, ...rest].slice(0, 3);
-
+      const hasExpenseSheet = scored.some(s => s.expense > 0 || s.pnl > 0);
       const csvText = ordered.map(s => `=== HOJA: ${s.name} ===\n${s.text}`).join('\n\n');
 
       await analyzeExcelWithAI(csvText, file.name, { hasExpenseSheet, sheetCount: names.length });
@@ -1773,7 +1779,7 @@ Respondé SOLO con JSON válido:
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 3000,
+        max_tokens: 4000,
         system: systemPrompt,
         messages: [{ role: 'user', content: userMsg }]
       })
@@ -1786,7 +1792,9 @@ Respondé SOLO con JSON válido:
 
     const parsed = JSON.parse(jsonMatch[0]);
     // Support both old single-month and new multi-month format
-    excelAnalyzedData = parsed.months ? parsed : { months: [{ ...parsed, key: parsed.key || getCurrentMonthKey() }] };
+    const normalized = parsed.months ? parsed : { months: [{ ...parsed, key: parsed.key || getCurrentMonthKey() }] };
+    if (noExpenseWarning) normalized._noExpenseWarning = true;
+    excelAnalyzedData = normalized;
     showExcelResults(excelAnalyzedData);
   } catch(err) {
     document.getElementById('excelAnalyzing').classList.remove('show');
